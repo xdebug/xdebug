@@ -349,17 +349,22 @@ static bool extract_line_range(path_maps_parser_state *state, const char *elemen
 			return false;
 		}
 
-		end_lineno = strtol(minus + 1, &end_ptr, 10);
-		if (*end_ptr != '\0') { /* something else followed the number */
-			char *message = xdebug_sprintf("%s element: Non-number found as end range: '%s'",
-				element_name_as_string[element_type],
-				colon
-			);
+		/* Check for 'EOF' */
+		if (minus[1] == 'E' && minus[2] == 'O' && minus[3] == 'F' && minus[4] == '\0') {
+			end_lineno = XDEBUG_PATH_MAP_EOF;
+		} else {
+			end_lineno = strtol(minus + 1, &end_ptr, 10);
+			if (*end_ptr != '\0') { /* something else followed the number */
+				char *message = xdebug_sprintf("%s element: Non-number found as end range: '%s'",
+					element_name_as_string[element_type],
+					colon
+				);
 
-			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+				state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
 
-			xdfree(message);
-			return false;
+				xdfree(message);
+				return false;
+			}
 		}
 
 		if (end_lineno < begin_lineno) {
@@ -580,7 +585,26 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 			goto failure;
 		}
 
-		/* - if local range is multiple lines, then remote range needs to be to, and the same difference */
+		/* - if remote is a range that ends in EOF, then a local range needs to be single, or also end in EOF */
+		if (
+			(remote_type == XDEBUG_PATH_MAP_TYPE_LINES && remote_begin != remote_end) &&
+			remote_end == XDEBUG_PATH_MAP_EOF &&
+			(local_begin != local_end) /* not a single line */
+		) {
+			if (local_end != XDEBUG_PATH_MAP_EOF) {
+				char *message = xdebug_sprintf("The local range span (%d-%d) needs to be a single line, or end in 'EOF'",
+					local_begin, local_end);
+				state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+				xdfree(message);
+
+				goto failure;
+			} else {
+				/* Adjust end local range so that they have the same difference */
+				local_end = local_end + local_begin - remote_begin;
+			}
+		}
+
+		/* - if local range is multiple lines, then remote range needs to be too, and the same difference */
 		if (
 			(remote_type == XDEBUG_PATH_MAP_TYPE_LINES && local_begin != local_end) &&
 			((remote_end - remote_begin) != (local_end - local_begin))

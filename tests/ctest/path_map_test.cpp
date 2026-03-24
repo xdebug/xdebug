@@ -1820,3 +1820,59 @@ TEST(path_maps_file, vendor_skip)
 	test_remote_to_local("RELATIVE/src/vendor/autoload.php", 42);
 	check_map_with_range(XDEBUG_PATH_MAP_FLAGS_SKIP, NULL, -1, LOCATION);
 };
+
+TEST(path_maps_file, range_span_n_EOF_to_1)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:5-EOF = /example.php:8
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	test_remote_to_local("/usr/local/www/example.php", 8);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 8, LOCATION);
+
+	test_remote_to_local("/usr/local/www/example.php", 821238);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 8, LOCATION);
+
+	test_local_to_remote("/home/derick/project/example.php", 8);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/usr/local/www/example.php", 5, LOCATION);
+};
+
+TEST(path_maps_file, range_span_n_EOF_to_m)
+{
+	const char *map = R""""(
+/example.php:5-EOF = /example.php:8-9
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 2, "The local range span (8-9) needs to be a single line, or end in 'EOF'", LOCATION);
+};
+
+TEST(path_maps_file, range_span_n_EOF_to_m_EOF)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:1-4 = /example.php:1
+/example.php:5-EOF = /example.php:2-EOF
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	test_remote_to_local("/usr/local/www/example.php", 8);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 5, LOCATION);
+
+	test_remote_to_local("/usr/local/www/example.php", 821238);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 821235, LOCATION);
+
+	test_local_to_remote("/home/derick/project/example.php", 8);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/usr/local/www/example.php", 11, LOCATION);
+
+	test_local_to_remote("/home/derick/project/example.php", 87654321);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/usr/local/www/example.php", 87654324, LOCATION);
+};
