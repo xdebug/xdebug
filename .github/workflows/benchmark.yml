@@ -170,7 +170,7 @@ jobs:
             -   name: delete intermediary artifacts
                 # The intermediate files that we generated are not needed and can be deleted,
                 # helping us keep the summary page clean
-                uses: geekyeggo/delete-artifact@v5
+                uses: geekyeggo/delete-artifact@v6
                 with:
                     name: results-*                
 
