@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2025 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -594,7 +594,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				case 'S': { /* session id */
 					zval *data;
 					char *char_ptr, *strval;
-					char *sess_name;
+					const char *sess_name;
 
 					sess_name = zend_ini_string((char*) "session.name", sizeof("session.name"), 0);
 

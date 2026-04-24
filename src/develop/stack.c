@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -871,8 +871,13 @@ char *xdebug_get_printable_stack(int html, int error_type, const char *buffer, c
 	char       *error_type_str = xdebug_error_type(error_type);
 	char       *error_type_str_simple = xdebug_error_type_simple(error_type);
 	xdebug_str  str = XDEBUG_STR_INITIALIZER;
+#if PHP_VERSION_ID >= 80600
+	const char *prepend_string = zend_ini_string_literal("error_prepend_string");
+	const char *append_string = zend_ini_string_literal("error_append_string");
+#else
 	char       *prepend_string = INI_STR((char*) "error_prepend_string");
 	char       *append_string = INI_STR((char*) "error_append_string");
+#endif
 
 	if (prepend_string) {
 		xdebug_str_add(&str, prepend_string, 0);
@@ -939,8 +944,13 @@ static char *xdebug_handle_stack_trace(int type, char *error_type_str, const cha
 	/* We need to see if we have an uncaught exception fatal error now */
 	if (type == E_ERROR && ((tmp_buf = xdebug_strip_php_stack_trace(buffer)) != NULL)) {
 		xdebug_str  str = XDEBUG_STR_INITIALIZER;
+#if PHP_VERSION_ID >= 80600
+		const char *prepend_string = zend_ini_string_literal("error_prepend_string");
+		const char *append_string = zend_ini_string_literal("error_append_string");
+#else
 		char       *prepend_string = INI_STR((char*) "error_prepend_string");
 		char       *append_string = INI_STR((char*) "error_append_string");
+#endif
 
 		if (prepend_string) {
 			xdebug_str_add(&str, prepend_string, 0);
@@ -1268,8 +1278,13 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 		}
 		if (PG(display_errors)) {
 			xdebug_str displ_tmp_str = XDEBUG_STR_INITIALIZER;
+#if PHP_VERSION_ID >= 80600
+			const char *prepend_string = zend_ini_string_literal("error_prepend_string");
+			const char *append_string = zend_ini_string_literal("error_append_string");
+#else
 			char *prepend_string = INI_STR((char*) "error_prepend_string");
 			char *append_string = INI_STR((char*) "error_append_string");
+#endif
 
 			if (prepend_string) {
 				xdebug_str_add(&displ_tmp_str, prepend_string, 0);
