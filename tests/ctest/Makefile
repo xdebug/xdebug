@@ -18,10 +18,10 @@ ctest: xdebuglib.a ${C_TESTS} ${SOURCE_FILES} ${HEADER_FILES} all_tests.cpp
 	g++ ${CPPFLAGS} all_tests.cpp ${C_TESTS} ${SOURCE_FILES} xdebuglib.a -I ${INCLUDE_PATH} -o ctest ${LDFLAGS}
 
 afl-test-parser: xdebuglib.a ${C_TESTS} ${SOURCE_FILES} ${HEADER_FILES} fuzzing-shim-parser.c
-	afl-g++ ${CPPFLAGS} fuzzing-shim-parser.c ${SOURCE_FILES} xdebuglib.a -I ${INCLUDE_PATH} -o afl-test-parser ${LDFLAGS}
+	afl-clang-fast ${CPPFLAGS} fuzzing-shim-parser.c ${SOURCE_FILES} xdebuglib.a -I ${INCLUDE_PATH} -o afl-test-parser ${LDFLAGS}
 
 afl-test-mapper: xdebuglib.a ${C_TESTS} ${SOURCE_FILES} ${HEADER_FILES} fuzzing-shim-mapper.c
-	afl-g++ ${CPPFLAGS} fuzzing-shim-mapper.c ${SOURCE_FILES} xdebuglib.a -I ${INCLUDE_PATH} -o afl-test-mapper ${LDFLAGS}
+	afl-clang-fast ${CPPFLAGS} fuzzing-shim-mapper.c ${SOURCE_FILES} xdebuglib.a -I ${INCLUDE_PATH} -o afl-test-mapper ${LDFLAGS}
 
 xdebuglib.a: hash.o llist.o normalize_path.o str.o trim.o xdebug_strndup.o
 	ar -rc xdebuglib.a hash.o llist.o normalize_path.o str.o trim.o xdebug_strndup.o
