@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,16 @@
 #define XDEBUG_PATH_MAP_TYPE_MASK      0x0f
 #define XDEBUG_PATH_MAP_FLAGS_SKIP     0x10
 #define XDEBUG_PATH_MAP_FLAGS_MASK     0xf0
+
+#define XDEBUG_PATH_MAP_EOF            1 << 30
+
+#if !defined DEFAULT_SLASH
+# ifdef WIN32
+#  define DEFAULT_SLASH '\\'
+# else
+#  define DEFAULT_SLASH '/'
+# endif
+#endif
 
 typedef struct xdebug_path_map_range xdebug_path_map_range;
 
