@@ -14,8 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-#include "usefulstuff.h"
+#include <stdlib.h>
+#include <string.h>
+
 #include "cmd_parser.h"
+#include "stripcslashes.h"
 
 /* {{{ Constants for state machine */
 #define STATE_NORMAL                   0

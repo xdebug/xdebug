@@ -127,6 +127,8 @@ Tue, Feb 03, 2026 - Xdebug 3.5.1
      <file name="set.h" role="src" />
      <file name="str.c" role="src" />
      <file name="str.h" role="src" />
+     <file name="stripcslashes.c" role="src" />
+     <file name="stripcslashes.h" role="src" />
      <file name="strrnchr.h" role="src" />
      <file name="timing.c" role="src" />
      <file name="timing.h" role="src" />
