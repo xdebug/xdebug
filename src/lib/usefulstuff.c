@@ -444,9 +444,10 @@ FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **
 		goto lock;
 	}
 
+	/* 4. It exists, check if we can open it. */
 	fh = xdebug_open_file(fname, "r+", extension, new_fname);
 	if (!fh) {
-		/* 4. If fh == null we couldn't even open the file, so open a new one with a new name */
+		/* If fh == null we couldn't even open the file, so open a new one with a new name */
 		fh = xdebug_open_file_with_random_ext(fname, "w", extension, new_fname);
 		goto lock;
 	}
