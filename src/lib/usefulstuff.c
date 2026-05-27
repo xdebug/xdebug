@@ -429,7 +429,7 @@ FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **
 	} else {
 		tmp_fname = xdstrdup(fname);
 	}
-	r = stat(tmp_fname, &buf);
+	r = lstat(tmp_fname, &buf);
 	/* We're not freeing "tmp_fname" as that is used in the freopen as well. */
 
 	if (r == -1) {
@@ -438,7 +438,12 @@ FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **
 		goto lock;
 	}
 
-	/* 3. It exists, check if we can open it. */
+	/* 3. If the file exists, but is a symlink, we need to not follow it, and instead create a new file */
+	if (S_ISLNK(buf.st_mode)) {
+		fh = xdebug_open_file_with_random_ext(fname, "w", extension, new_fname);
+		goto lock;
+	}
+
 	fh = xdebug_open_file(fname, "r+", extension, new_fname);
 	if (!fh) {
 		/* 4. If fh == null we couldn't even open the file, so open a new one with a new name */
