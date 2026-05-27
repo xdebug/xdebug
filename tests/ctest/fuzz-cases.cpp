@@ -4,6 +4,7 @@
 
 #include "maps_private.h"
 #include "parser.h"
+#include "cmd_parser.h"
 
 TEST_GROUP(fuzz_cases)
 {
@@ -125,4 +126,18 @@ local_prefix: /hom/project
 
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_GARBAGE, 5, "Remote part is empty");
+};
+
+TEST(fuzz_cases, cmd_parser_wrong_opt_letter_1)
+{
+	char *cmd;
+	xdebug_dbgp_arg *ret_args;
+	int ret;
+
+	ret = xdebug_cmd_parse("ps -D x", &cmd, &ret_args);
+
+	LONGS_EQUAL(XDEBUG_ERROR_PARSE, ret);
+
+	xdfree(cmd);
+	xdebug_cmd_arg_dtor(ret_args);
 };

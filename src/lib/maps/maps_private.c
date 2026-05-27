@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2025 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,10 @@
 #include "../strrnchr.h"
 #include "../vector.h"
 #include "../xdebug_strndup.h"
+
+#ifndef DEFAULT_SLASH
+# define DEFAULT_SLASH '/'
+#endif
 
 static bool do_local_binary_search(xdebug_vector *line_ranges, int low, int high, size_t remote_line, xdebug_str **local_path, size_t *local_line)
 {
