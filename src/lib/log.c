@@ -735,8 +735,16 @@ static void print_step_debug_information(void)
 				XG_DBG(context).resolved_breakpoints ? "Yes" : "No"
 			);
 			xdebug_info_printf(
-				"<tr><td class=\"e\">Breakpoint Details</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				"<tr><td class=\"e\">Breakpoint: Details</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
 				XG_DBG(context).breakpoint_details ? "Yes" : "No"
+			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Breakpoint: Include Return Values</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				XG_DBG(context).breakpoint_include_return_value ? "Yes" : "No"
+			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Virtual __EXCEPTION Value</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				XG_DBG(context).virtual_exception_value ? "Yes" : "No"
 			);
 		}
 	} else {
@@ -774,7 +782,7 @@ static void print_step_debug_information(void)
 			xdebug_info_printf("Resolved Breakpoints => %s\n", XG_DBG(context).resolved_breakpoints ? "Yes" : "No");
 			xdebug_info_printf("Breakpoint: Details => %s\n", XG_DBG(context).breakpoint_details ? "Yes" : "No");
 			xdebug_info_printf("Breakpoint: Include Return Values => %s\n", XG_DBG(context).breakpoint_include_return_value ? "Yes" : "No");
-			xdebug_info_printf("Virtual __EXCEPTION value => %s\n", XG_DBG(context).virtual_exception_value ? "Yes" : "No");
+			xdebug_info_printf("Virtual __EXCEPTION Value => %s\n", XG_DBG(context).virtual_exception_value ? "Yes" : "No");
 		}
 	}
 	php_info_print_table_end();
