@@ -90,6 +90,10 @@ int xdebug_cmd_parse(const char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 			case STATE_OPT_FOLLOWS:
 				opt = *ptr;
 				state = STATE_SEP_FOLLOWS;
+				/* Only accept option letters in [a-z] plus '-' */
+				if ((opt < 'a' || opt > 'z') && opt != '-') {
+					goto parse_error;
+				}
 				break;
 			case STATE_SEP_FOLLOWS:
 				if (*ptr != ' ') {
