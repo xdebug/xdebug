@@ -819,7 +819,7 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 						state = 1;
 						keyword_end = &ptr[ctr];
 
-						if (strncmp(keyword, "::", 2) == 0 && active_fse->function.object_class) { /* static class properties */
+						if (strncmp(keyword, "::", 2) == 0 && active_fse && active_fse->function.object_class) { /* static class properties */
 							zend_class_entry *ce = zend_fetch_class(active_fse->function.object_class, ZEND_FETCH_CLASS_SELF);
 
 							current_classname = estrdup(STR_NAME_VAL(ce->name));
