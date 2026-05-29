@@ -271,7 +271,7 @@ char *xdebug_path_from_url(zend_string *fileurl)
 
 	if (tmp) {
 		fp = tmp + 7;
-		if (fp[0] == '/' && fp[2] == ':') {
+		if (fp[0] == '/' && fp[1] != '\0' && fp[2] == ':') {
 			fp++;
 		}
 		ret = xdstrdup(fp);
