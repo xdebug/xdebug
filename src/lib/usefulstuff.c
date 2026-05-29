@@ -622,6 +622,11 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				case '%': /* literal % */
 					xdebug_str_addc(&fname, '%');
 					break;
+
+				case '\0': /* trailing % */
+					xdebug_str_addc(&fname, '%');
+					format--;
+					break;
 			}
 		}
 		format++;
@@ -713,6 +718,11 @@ int xdebug_format_filename(char **formatted_name, const char *default_fmt, zend_
 					break;
 				case '%': /* literal % */
 					xdebug_str_addc(&fname, '%');
+					break;
+
+				case '\0': /* trailing % */
+					xdebug_str_addc(&fname, '%');
+					format--;
 					break;
 			}
 		}
