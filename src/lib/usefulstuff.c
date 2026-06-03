@@ -656,6 +656,11 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 				case '%': /* literal % */
 					xdebug_str_addc(&fname, '%');
 					break;
+
+				case '\0': /* trailing % */
+					xdebug_str_addc(&fname, '%');
+					format--;
+					break;
 			}
 		}
 		format++;
