@@ -518,6 +518,9 @@ static xdebug_str* return_file_source(zend_string *filename, int begin, int end)
 	char  *line = NULL;
 	xdebug_str *source = xdebug_str_new();
 	char *tmp_filename = NULL;
+#ifndef WIN32
+	php_stream_statbuf ssb = {0};
+#endif
 
 	if (i < 0) {
 		begin = 0;
@@ -531,10 +534,23 @@ static xdebug_str* return_file_source(zend_string *filename, int begin, int end)
 			NULL);
 	xdfree(tmp_filename);
 
-	/* Read until the "begin" line has been read */
+	/* If we couldn't open the stream, bail out */
 	if (!stream) {
 		return NULL;
 	}
+
+#ifndef WIN32
+	/* Check what we're dealing with */
+	if (php_stream_stat(stream, &ssb) != 0) {
+		php_stream_close(stream);
+		return NULL;
+	}
+	/* If it's a directory, bail out */
+	if (S_ISDIR(ssb.sb.st_mode)) {
+		php_stream_close(stream);
+		return NULL;
+	}
+#endif
 
 	/* skip to the first requested line */
 	while (i > 0 && !php_stream_eof(stream)) {
