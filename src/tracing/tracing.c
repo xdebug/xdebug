@@ -206,8 +206,6 @@ PHP_FUNCTION(xdebug_get_tracefile_name)
 {
 	char *filename;
 
-	WARN_AND_RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_TRACING);
-
 	filename = xdebug_get_trace_filename();
 	if (!filename) {
 		RETURN_FALSE;
