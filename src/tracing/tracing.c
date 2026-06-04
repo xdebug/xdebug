@@ -297,7 +297,7 @@ static int is_fetch_op(const zend_op *op)
 	);
 }
 
-static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op *cur_opcode, const zend_op *lower_bound)
+static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op *cur_opcode)
 {
 	const zend_op *next_opcode, *prev_opcode = NULL, *opcode_ptr;
 	zval          *dimval;
@@ -307,6 +307,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 	xdebug_str    *zval_value = NULL;
 	xdebug_var_export_options *options;
 	const zend_op *static_opcode_ptr = NULL;
+	const zend_op *lower_bound = op_array->opcodes;
 
 	next_opcode = cur_opcode + 1;
 	prev_opcode = cur_opcode - 1;
@@ -323,10 +324,8 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 	options->no_decoration = 1;
 
 	if (cur_opcode->op1_type == IS_CV) {
-		if (!lower_bound) {
-			xdebug_str_addc(&name, '$');
-			xdebug_str_add(&name, zend_get_compiled_variable_name(op_array, cur_opcode->op1.var)->val, 0);
-		}
+		xdebug_str_addc(&name, '$');
+		xdebug_str_add(&name, zend_get_compiled_variable_name(op_array, cur_opcode->op1.var)->val, 0);
 	} else if (cur_opcode->op1_type == IS_VAR && cur_opcode->opcode == ZEND_ASSIGN && (prev_opcode->opcode == ZEND_FETCH_W || prev_opcode->opcode == ZEND_FETCH_RW)) {
 		if (is_static) {
 			xdebug_str_add_literal(&name, "self::");
@@ -510,7 +509,7 @@ static int xdebug_common_assign_dim_handler(const char *op, XDEBUG_OPCODE_HANDLE
 		if (cur_opcode->opcode == ZEND_QM_ASSIGN && cur_opcode->result_type != IS_CV) {
 			return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
-		full_varname = xdebug_find_var_name(execute_data, execute_data->opline, NULL);
+		full_varname = xdebug_find_var_name(execute_data, execute_data->opline);
 
 		if (cur_opcode->opcode >= ZEND_PRE_INC && cur_opcode->opcode <= ZEND_POST_DEC) {
 			char *tmp_varname;
@@ -564,21 +563,21 @@ static int xdebug_common_assign_dim_handler(const char *op, XDEBUG_OPCODE_HANDLE
 				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op2.var)->val);
 			} else {
 				const zend_op *referenced_opline = xdebug_find_referenced_opline(execute_data, cur_opcode, 2);
-				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, NULL);
+				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline);
 			}
 		} else if (cur_opcode->opcode == ZEND_ASSIGN_OBJ_REF) {
 			if (next_opcode->op1_type == IS_CV) {
 				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, next_opcode->op1.var)->val);
 			} else {
 				const zend_op *referenced_opline = xdebug_find_referenced_opline(execute_data, next_opcode, 1);
-				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, NULL);
+				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline);
 			}
 		} else if (cur_opcode->opcode == ZEND_ASSIGN_STATIC_PROP_REF) {
 			if (next_opcode->op1_type == IS_CV) {
 				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, next_opcode->op1.var)->val);
 			} else {
 				const zend_op *referenced_opline = xdebug_find_referenced_opline(execute_data, next_opcode, 1);
-				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, NULL);
+				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline);
 			}
 		} else {
 			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2);
