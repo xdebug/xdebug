@@ -41,10 +41,10 @@ Code Coverage Analysis
  </lead>
 
  <date>2026-06-08</date>
- <time>14:29:49</time>
+ <time>14:37:46</time>
  <version>
-  <release>3.5.2</release>
-  <api>3.5.2</api>
+  <release>3.5.3</release>
+  <api>3.5.3</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,7 +52,7 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Mon, Jun 08, 2026 - Xdebug 3.5.2
+Mon, Jun 08, 2026 - Xdebug 3.5.3
 
 = Fixed bugs:
 
@@ -64,6 +64,10 @@ Mon, Jun 08, 2026 - Xdebug 3.5.2
   - Fixed issue #2423: Don&#039;t follow symlinks with file creation
   - Fixed issue #2424: Control-socket buffer crashes
   - Fixed issue #2426: xdebug_get_tracefile_name incorrectly throws notice
+  - Fixed issue #2427: Crash when file_link_format setting is wrong
+  - Fixed issue #2429: Crash when trace_output_name setting is wrong
+  - Fixed issue #2430: Variable fetching may crash with `::` if there is no active stack
+  - Fixed issue #2431: Crash when trying to retrieve Windows-style URL with not enough characters
   - Fixed issue #2433: Refactor finding variable names in trace files with assignments
 
  </notes>
