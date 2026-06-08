@@ -136,7 +136,7 @@ static void handle_command(HANDLE h, const char *line)
 	char *cmd = NULL;
 	xdebug_dbgp_arg *args;
 	int res = 0;
-	xdebug_ctrl_cmd *command;
+	xdebug_ctrl_cmd *command = NULL;
 	xdebug_str *message;
 	xdebug_xml_node *retval;
 	res = xdebug_cmd_parse(line, (char**) &cmd, (xdebug_dbgp_arg**) &args);
@@ -144,17 +144,29 @@ static void handle_command(HANDLE h, const char *line)
 	retval = xdebug_xml_node_init("ctrl-response");
 	xdebug_xml_add_attribute(retval, "xmlns:xdebug-ctrl", "https://xdebug.org/ctrl/xdebug");
 
+	if (res != XDEBUG_ERROR_OK) {
+		xdebug_xml_node *error = xdebug_xml_node_init("error");
+		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_INVALID_ARGS), 0, 1);
+		ADD_REASON_MESSAGE(XDEBUG_ERROR_INVALID_ARGS);
+		xdebug_xml_add_child(retval, error);
+
+		goto send_result;
+	}
+
 	command = lookup_cmd(cmd);
-	if (command) {
-		command->handler(&retval, args);
-	} else {
-		xdebug_xml_node *error;
-		error = xdebug_xml_node_init("error");
+
+	if (!command) {
+		xdebug_xml_node *error = xdebug_xml_node_init("error");
 		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_COMMAND_UNAVAILABLE), 0, 1);
 		ADD_REASON_MESSAGE(XDEBUG_ERROR_COMMAND_UNAVAILABLE);
 		xdebug_xml_add_child(retval, error);
+
+		goto send_result;
 	}
 
+	command->handler(&retval, args);
+
+send_result:
 	message = make_message(retval);
 #if __linux__
 	write(fd, message->d, message->l);
@@ -289,7 +301,7 @@ static void xdebug_control_socket_handle(void)
 		}
 
 		memset(buffer, 0, sizeof(buffer));
-		bytes_read = read(new_sd, buffer, sizeof(buffer));
+		bytes_read = read(new_sd, buffer, sizeof(buffer) - 1);
 		if (bytes_read == -1) {
 			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from socket: %s", strerror(errno));
 		} else {
@@ -353,7 +365,7 @@ static void xdebug_control_socket_handle(void)
 	if (!ReadFile(
 		XG_BASE(control_socket_h),
 		buffer,
-		sizeof(buffer),
+		sizeof(buffer) - 1,
 		&bytes_read,
 		&XG_BASE(control_socket_ov)
 	)) {
