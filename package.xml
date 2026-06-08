@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2026-02-03</date>
- <time>15:38:25</time>
+ <date>2026-06-08</date>
+ <time>14:29:49</time>
  <version>
-  <release>3.5.1</release>
-  <api>3.5.1</api>
+  <release>3.5.2</release>
+  <api>3.5.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,13 +52,19 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Tue, Feb 03, 2026 - Xdebug 3.5.1
+Mon, Jun 08, 2026 - Xdebug 3.5.2
 
 = Fixed bugs:
 
-  - Fixed issue #2391: Code Coverage times out on random tests
-  - Fixed issue #2395: Severe performance degredation on Windows
-  - Fixed issue #2397: Very slow with Xdebug 3.5.0
+  - Fixed issue #2404: Xdebug outputs a message to stderr when path mapping is enabled, and a directory is present
+  - Fixed issue #2405: Handle minimum path in .xdebug directory discovery
+  - Fixed issue #2411: Native Path Mapping is not applied to the initial fileuri in the init packet
+  - Fixed issue #2421: Crash with wrong option letter in DBGP and socket commands
+  - Fixed issue #2422: No limit on DBGP read buffer
+  - Fixed issue #2423: Don&#039;t follow symlinks with file creation
+  - Fixed issue #2424: Control-socket buffer crashes
+  - Fixed issue #2426: xdebug_get_tracefile_name incorrectly throws notice
+  - Fixed issue #2433: Refactor finding variable names in trace files with assignments
 
  </notes>
 
@@ -230,6 +236,30 @@ Tue, Feb 03, 2026 - Xdebug 3.5.1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2026-02-03</date>
+   <time>15:38:25</time>
+   <version>
+    <release>3.5.1</release>
+    <api>3.5.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Tue, Feb 03, 2026 - Xdebug 3.5.1
+
+= Fixed bugs:
+
+  - Fixed issue #2391: Code Coverage times out on random tests
+  - Fixed issue #2395: Severe performance degredation on Windows
+  - Fixed issue #2397: Very slow with Xdebug 3.5.0
+
+   </notes>
+  </release>
 
   <release>
    <date>2025-12-04</date>
