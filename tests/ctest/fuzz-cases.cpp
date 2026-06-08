@@ -141,3 +141,17 @@ TEST(fuzz_cases, cmd_parser_wrong_opt_letter_1)
 	xdfree(cmd);
 	xdebug_cmd_arg_dtor(ret_args);
 };
+
+TEST(fuzz_cases, cmd_parser_empty_result)
+{
+	char *cmd;
+	xdebug_dbgp_arg *ret_args;
+	int ret;
+
+	ret = xdebug_cmd_parse("", &cmd, &ret_args);
+
+	LONGS_EQUAL(XDEBUG_ERROR_PARSE, ret);
+
+	xdfree(cmd);
+	xdebug_cmd_arg_dtor(ret_args);
+};
