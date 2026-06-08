@@ -14,6 +14,9 @@ log_errors=0
 --FILE--
 <?php
 echo strlen("45"), "\n";
+
+$tfn = xdebug_get_tracefile_name();
+@unlink($tfn);
 ?>
 --EXPECTF--
 Notice: A wrong value for xdebug.trace_format was selected (42), defaulting to the textual format in %s/bug01112.php on line 2
