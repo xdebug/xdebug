@@ -2991,7 +2991,7 @@ function error(string $message): void
 function settings2array(array $settings, array &$ini_settings): void
 {
     foreach ($settings as $setting) {
-        if (strpos($setting, '=') !== false) {
+        if ($setting && strpos($setting, '=') !== false) {
             $setting = explode("=", $setting, 2);
             $name = trim($setting[0]);
             $value = trim($setting[1]);
