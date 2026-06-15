@@ -453,7 +453,7 @@ void xdebug_control_socket_setup(void)
 		return;
 	}
 
-	XG_BASE(control_socket_path) = xdebug_sprintf("xdebug-ctrl." ZEND_ULONG_FMT, xdebug_get_pid());
+	XG_BASE(control_socket_path) = xdebug_sprintf("xdebug-ctrl." ZEND_ULONG_FMT, getpid());
 
 	/* Part 2b — Configure socket */
 	servaddr = (struct sockaddr_un *)xdmalloc(sizeof(struct sockaddr_un));
