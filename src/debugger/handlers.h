@@ -94,6 +94,7 @@ struct _xdebug_con {
 	int                    resolved_breakpoints;
 	int                    breakpoint_details;
 	int                    breakpoint_include_return_value;
+	int                    multiple_sessions;
 
 	/* Statistics and diagnostics */
 	char *connected_hostname;
