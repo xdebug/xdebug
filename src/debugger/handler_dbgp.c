@@ -1430,6 +1430,11 @@ DBGP_FUNC(feature_get)
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
+		XDEBUG_STR_CASE("multiple_sessions")
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%ld", XG_DBG(context).multiple_sessions));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
+		XDEBUG_STR_CASE_END
+
 		XDEBUG_STR_CASE_DEFAULT
 			xdebug_xml_add_text(*retval, xdstrdup(lookup_cmd(CMD_OPTION_CHAR('n')) ? "1" : "0"));
 			xdebug_xml_add_attribute(*retval, "supported", lookup_cmd(CMD_OPTION_CHAR('n')) ? "1" : "0");
@@ -1482,7 +1487,7 @@ DBGP_FUNC(feature_set)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("multiple_sessions")
-			/* FIXME: Add new boolean option check / struct field for this */
+			XG_DBG(context).multiple_sessions = strtol(CMD_OPTION_CHAR('v'), NULL, 10);
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("extended_properties")
@@ -2439,6 +2444,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->resolved_breakpoints = 0;
 	context->breakpoint_details = 0;
 	context->breakpoint_include_return_value = 0;
+	context->multiple_sessions = 0;
 
 	xdebug_mark_debug_connection_active();
 	xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BAIL);
