@@ -133,7 +133,7 @@ jobs:
                     echo "${{ matrix.php }},${{ matrix.command }},${{ matrix.xdebug_mode }}" > results/matrix-values-${{ matrix.php }}-${{ matrix.command }}-${{ matrix.xdebug_mode }}.txt
 
             -   name: Upload result and matrix info
-                uses: actions/upload-artifact@v6
+                uses: actions/upload-artifact@v7
                 with:
                     name: results-${{ matrix.command }}-${{ matrix.php }}-${{ matrix.xdebug_mode }}
                     path: results/
@@ -175,7 +175,7 @@ jobs:
                     name: results-*                
 
             -   name: Upload summary.csv as artifact
-                uses: actions/upload-artifact@v6
+                uses: actions/upload-artifact@v7
                 with:
                     name: summary.csv
                     path: summary.csv
