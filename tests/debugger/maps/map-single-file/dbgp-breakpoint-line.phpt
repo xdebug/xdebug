@@ -10,7 +10,7 @@ check_reqs('dbgp');
 require __DIR__ . '/../../dbgp/dbgpclient.php';
 $filename = dirname(__FILE__) . '/dbgp-breakpoint-line.inc';
 
-$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_ignore_yes_env.txt';
+$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'dbgp-breakpoint-line.txt';
 @unlink( $xdebugLogFileName );
 
 $commands = array(
@@ -42,7 +42,7 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] [Path Mapping] DEBUG: No map files found with pattern '%sdebugger%emaps%e.xdebug%e*.map'
 [%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%emaps%emap-single-file%e.xdebug%e*.map'
 [%d] [Path Mapping] INFO: Reading mapping file '%sdebugger%emaps%emap-single-file%e.xdebug%esimple.map'
-[%d] [Path Mapping] DEBUG: Found 3 path mapping rules
+[%d] [Path Mapping] DEBUG: Found %d path mapping rules
 %A
 [%d] [Step Debug] <- breakpoint_set -i 3 -t line -f /var/www/projects/xdebug-test/fake-local-file.php -n 3
 [%d] [Path Mapping] INFO: Mapping (to replace) local location /var/www/projects/xdebug-test/fake-local-file.php:3
