@@ -162,10 +162,62 @@ jobs:
     environment:
       REPORT_EXIT_STATUS: 1
 
+  "PHP 8 3 debug":
+    docker:
+      - image: ubuntu:22.04
+    steps:
+      - run:
+          name: Install build dependencies
+          command: |
+            apt-get update -y
+            apt-get install -y \
+              autoconf bison build-essential pkg-config \
+              libsqlite3-dev libonig-dev re2c wget
+      - run:
+          name: Build PHP 8.3 with --enable-debug
+          command: |
+            cd /tmp
+            wget -q https://www.php.net/distributions/php-8.3.0.tar.bz2
+            tar xjf php-8.3.0.tar.bz2
+            cd php-8.3.0
+            ./buildconf --force
+            ./configure \
+              --enable-debug \
+              --without-pear \
+              --without-pdo-sqlite \
+              --disable-dom \
+              --disable-simplexml \
+              --disable-xml \
+              --disable-xmlreader \
+              --disable-xmlwriter \
+              --without-libxml \
+              --enable-mbstring \
+              --disable-mbregex \
+              --enable-bcmath \
+              --enable-zend-test
+            make -j$(nproc)
+            make install
+      - checkout
+      - run:
+          name: Compile Xdebug
+          command: |
+            phpize
+            ./configure
+            make -j$(nproc)
+            make install
+            echo 'export CWD=`eval echo "${CIRCLE_WORKING_DIRECTORY}"`' >> $BASH_ENV
+      - run:
+          name: Run tests
+          command: |
+            export TEST_PHP_ARGS="-n -d foo=yes -d zend_extension=${CWD}/modules/xdebug.so"
+            export REPORT_EXIT_STATUS=1
+            php run-xdebug-tests.php -q -x --show-diff
+
 workflows:
   version: 2
   testing:
     jobs:
+      - "PHP 8 3 debug"
       - "PHP 8 3 without opcache"
       - "PHP 8 3 with opcache"
       - "PHP 8 2 without opcache"
