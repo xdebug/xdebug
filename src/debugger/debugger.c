@@ -46,6 +46,7 @@ void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg)
 	xg->context.do_next      = 0;
 	xg->context.do_finish    = 0;
 	xg->context.do_connect_to_client = 0;
+	xg->context.do_request_reinit = 0;
 
 	xg->remote_connection_enabled  = 0;
 	xg->remote_connection_pid      = 0;

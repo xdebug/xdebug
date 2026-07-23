@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,20 +18,20 @@
 #define __XDEBUG_DEBUGGER_FRANKENPHP_H__
 
 /*
- * FrankenPHP Worker Mode Support
+ * FrankenPHP worker mode support.
  *
- * In FrankenPHP worker mode, RINIT/RSHUTDOWN are only called once per worker,
- * not per request. This module provides hooks to synchronize breakpoints
- * between worker requests using sapi_module.activate callback.
+ * In FrankenPHP worker mode, MINIT/RINIT/RSHUTDOWN/MSHUTDOWN run once per
+ * worker script, not per request. Per-request setup goes through
+ * sapi_module.activate / sapi_module.deactivate instead. We hook those to
+ * drive a per-request debugger lifecycle inside the worker loop: each
+ * request re-runs the normal activation checks (triggers, shared secret,
+ * xdebug.start_with_request) and closes its debug session on completion.
  *
- * When the IDE adds/removes breakpoints while the worker is running, those
- * DBGP commands are sent to the socket but not processed until the next
- * breakpoint is hit. By hooking sapi_module.activate, we can poll for pending
- * commands at the start of each worker request.
+ * If the SAPI is not "frankenphp", these functions are no-ops.
  */
 
 void xdebug_frankenphp_minit(void);
 void xdebug_frankenphp_mshutdown(void);
-void xdebug_debugger_poll_pending_commands(void);
+void xdebug_frankenphp_reinit_if_requested(void);
 
 #endif /* __XDEBUG_DEBUGGER_FRANKENPHP_H__ */

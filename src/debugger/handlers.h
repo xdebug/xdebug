@@ -85,6 +85,7 @@ struct _xdebug_con {
 	int                    next_level;
 	int                    do_finish;
 	int                    do_connect_to_client;
+	int                    do_request_reinit; /* set by the FrankenPHP worker mode hooks (frankenphp.c) */
 	int                    finish_level;
 	int                    finish_func_nr;
 
@@ -158,9 +159,6 @@ struct _xdebug_remote_handler {
 
 	/* Eval ID registration and removal */
 	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);
-
-	/* FrankenPHP worker mode: poll for pending commands without blocking */
-	int (*remote_poll_pending)(xdebug_con *h);
 };
 
 xdebug_brk_info *xdebug_brk_info_ctor(void);

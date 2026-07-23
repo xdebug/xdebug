@@ -39,6 +39,7 @@
 #if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 # include "ctrl_socket.h"
 #endif
+#include "debugger/frankenphp.h"
 #include "develop/develop.h"
 #include "develop/stack.h"
 #include "gcstats/gc_stats.h"
@@ -750,6 +751,14 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 			xdebug_tracing_init_if_requested(op_array);
 		}
+	}
+
+	/* FrankenPHP worker mode: on the first call executed for a new worker
+	 * request, re-run the request activation checks (see debugger/frankenphp.c).
+	 * This must come after the block above, so that the program name is set
+	 * before a debug session can be initiated. */
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		xdebug_frankenphp_reinit_if_requested();
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XDEBUG_VECTOR_COUNT(XG_BASE(stack)) >= XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
