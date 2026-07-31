@@ -15,6 +15,6 @@ require_once '_non_existing_file';
 ?>
 --EXPECTF--
 bla
-Warning: require_once(_non_existing_file): Failed to open stream: No such file or directory in %sbug02321-004.php on line %d
+Warning: require_once(%S): Failed to open stream: No such file or directory in %sbug02321-004.php on line %d
 %A
 1
