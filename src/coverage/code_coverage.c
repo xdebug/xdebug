@@ -226,8 +226,17 @@ static void xdebug_count_line(zend_string *filename, int lineno, int executable,
 		} else {
 			line->executable = 1;
 		}
-	} else {
+	} else if (!XG_COV(code_coverage_hit_count)) {
 		line->count++;
+	} else {
+		function_stack_entry *fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+
+		if (!fse) {
+			line->count++;
+		} else if (fse->code_coverage_last_lineno != lineno) {
+			line->count++;
+			fse->code_coverage_last_lineno = lineno;
+		}
 	}
 }
 
@@ -758,6 +767,17 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	XG_COV(code_coverage_unused) = (options & XDEBUG_CC_OPTION_UNUSED);
 	XG_COV(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
 	XG_COV(code_coverage_branch_check) = (options & XDEBUG_CC_OPTION_BRANCH_CHECK);
+	XG_COV(code_coverage_hit_count) = (options & XDEBUG_CC_OPTION_HIT_COUNT);
+
+	if (XG_COV(code_coverage_hit_count)) {
+		size_t i;
+
+		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++) {
+			function_stack_entry *fse = xdebug_vector_element_get(XG_BASE(stack), i);
+
+			fse->code_coverage_last_lineno = 0;
+		}
+	}
 
 	XG_COV(code_coverage_active) = 1;
 	RETURN_TRUE;
@@ -822,6 +842,8 @@ static void add_line(void *ret, xdebug_hash_element *e)
 
 	if (line->executable && (line->count == 0)) {
 		add_index_long(retval, line->lineno, -line->executable);
+	} else if (XG_COV(code_coverage_hit_count)) {
+		add_index_long(retval, line->lineno, line->count);
 	} else {
 		add_index_long(retval, line->lineno, 1);
 	}
@@ -1009,6 +1031,7 @@ void xdebug_init_coverage_globals(xdebug_coverage_globals_t *xg)
 	xg->branches.size        = 0;
 	xg->branches.last_branch_nr = NULL;
 	xg->code_coverage_active = 0;
+	xg->code_coverage_hit_count = 0;
 
 	/* Get reserved offset */
 	xg->dead_code_analysis_tracker_offset = zend_xdebug_cc_run_offset;
@@ -1319,6 +1342,7 @@ void xdebug_coverage_register_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_UNUSED", XDEBUG_CC_OPTION_UNUSED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_BRANCH_CHECK", XDEBUG_CC_OPTION_BRANCH_CHECK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_CC_HIT_COUNT", XDEBUG_CC_OPTION_HIT_COUNT, CONST_CS | CONST_PERSISTENT);
 }
 
 void xdebug_coverage_rinit(void)

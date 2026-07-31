@@ -80,6 +80,7 @@ typedef struct xdebug_var_name {
 #define XDEBUG_CC_OPTION_UNUSED          1
 #define XDEBUG_CC_OPTION_DEAD_CODE       2
 #define XDEBUG_CC_OPTION_BRANCH_CHECK    4
+#define XDEBUG_CC_OPTION_HIT_COUNT       8
 
 #define STATUS_STARTING   0
 #define STATUS_STOPPING   1
@@ -145,6 +146,7 @@ typedef struct _function_stack_entry {
 	bool         code_coverage_init;
 	char        *code_coverage_function_name;
 	zend_string *code_coverage_filename;
+	int          code_coverage_last_lineno;
 
 	/* location properties */
 	int          lineno;
