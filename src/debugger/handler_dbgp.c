@@ -1533,6 +1533,11 @@ DBGP_FUNC(feature_get)
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
+		XDEBUG_STR_CASE("multiple_sessions")
+			xdebug_xml_add_text(*retval, xdstrdup("0"));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
+		XDEBUG_STR_CASE_END
+
 		XDEBUG_STR_CASE("language_version")
 			xdebug_xml_add_text(*retval, xdstrdup(XG_BASE(php_version_run_time)));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
@@ -1657,10 +1662,6 @@ DBGP_FUNC(feature_set)
 
 		XDEBUG_STR_CASE("show_hidden")
 			options->show_hidden = strtol(CMD_OPTION_CHAR('v'), NULL, 10);
-		XDEBUG_STR_CASE_END
-
-		XDEBUG_STR_CASE("multiple_sessions")
-			/* FIXME: Add new boolean option check / struct field for this */
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("extended_properties")
