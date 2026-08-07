@@ -4,11 +4,14 @@
 #
 # Build (context must be the repository root):
 #   docker build -f tests/frankenphp/Dockerfile -t xdebug-frankenphp .
+#   docker build --build-arg PHP_VERSION=8.5 -f tests/frankenphp/Dockerfile .
 #
 # Run (IDE listening on the host, port 9003):
 #   docker run --rm -p 8080:8080 xdebug-frankenphp
 
-FROM dunglas/frankenphp:1-php8.4 AS build
+ARG PHP_VERSION=8.4
+
+FROM dunglas/frankenphp:1-php${PHP_VERSION} AS build
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential autoconf \
@@ -24,7 +27,7 @@ RUN phpize --clean 2>/dev/null || true \
  && cp modules/xdebug.so "$(php-config --extension-dir)/"
 
 # ---- runtime ----
-FROM dunglas/frankenphp:1-php8.4
+FROM dunglas/frankenphp:1-php${PHP_VERSION}
 
 COPY --from=build /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 
@@ -32,7 +35,7 @@ RUN { \
       echo 'zend_extension=xdebug.so'; \
       echo 'xdebug.mode=debug'; \
       echo 'xdebug.start_with_request=trigger'; \
-      echo 'xdebug.client_host=host.docker.internal'; \
+      echo 'xdebug.client_host=xdebug://gateway'; \
       echo 'xdebug.client_port=9003'; \
       echo 'xdebug.discover_client_host=0'; \
       echo 'xdebug.log=/tmp/xdebug.log'; \

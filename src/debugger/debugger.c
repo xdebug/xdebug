@@ -673,7 +673,9 @@ void xdebug_debugger_minit(void)
 	XG_DBG(breakpoint_count) = 0;
 
 	/* Initialize FrankenPHP worker mode support */
-	xdebug_frankenphp_minit();
+	if (xdebug_sapi_is_frankenphp()) {
+		xdebug_frankenphp_minit();
+	}
 }
 
 void xdebug_debugger_minfo(void)
@@ -687,6 +689,12 @@ void xdebug_debugger_minfo(void)
 void xdebug_debugger_rinit(void)
 {
 	char *idekey;
+
+	/* When RINIT runs, this is a regular request, and the normal activation
+	 * checks below apply. Only FrankenPHP *worker* requests skip RINIT, so
+	 * disarming the flag here makes it a reliable worker-request detector:
+	 * regular requests served by the FrankenPHP SAPI do no extra work. */
+	XG_DBG(context).do_request_reinit = 0;
 
 	xdebug_disable_opcache_optimizer();
 

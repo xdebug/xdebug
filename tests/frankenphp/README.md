@@ -11,7 +11,13 @@ Requires Docker. From the repository root (or anywhere):
 
 ```bash
 tests/frankenphp/run-tests.sh
+
+# Against another PHP version (any with a dunglas/frankenphp:1-phpX.Y image):
+PHP_VERSION=8.5 tests/frankenphp/run-tests.sh
 ```
+
+CI runs this for PHP 8.4 and 8.5 through
+`.github/workflows/frankenphp.yml`.
 
 This builds Xdebug against FrankenPHP's bundled ZTS PHP, starts a worker, and
 uses a scripted DBGp client to assert that:
@@ -24,18 +30,22 @@ uses a scripted DBGp client to assert that:
 
 ## Manual test with a real IDE
 
-Build and run, with the IDE listening on port 9003 on the host:
+Build and run, with the IDE listening on port 9003 on the host. The image
+defaults to `xdebug.client_host=xdebug://gateway`, which reaches the host
+directly on Linux — no `--add-host` needed:
 
 ```bash
 docker build -f tests/frankenphp/Dockerfile -t xdebug-frankenphp .
-
-# macOS / Windows (host.docker.internal is the image default):
 docker run --rm -p 8080:8080 xdebug-frankenphp
 
-# Linux:
+# macOS / Windows: the container's gateway is the Docker VM, not the host,
+# so point the client at the host explicitly:
 docker run --rm -p 8080:8080 \
-  --add-host=host.docker.internal:host-gateway \
+  -e XDEBUG_CLIENT_HOST=host.docker.internal \
   xdebug-frankenphp
+
+# Another PHP version:
+docker build --build-arg PHP_VERSION=8.5 -f tests/frankenphp/Dockerfile -t xdebug-frankenphp .
 ```
 
 Configure a path mapping in the IDE (`tests/frankenphp/app` → `/app/public`),

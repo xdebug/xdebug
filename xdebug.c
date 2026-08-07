@@ -621,7 +621,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_mshutdown();
 	}
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) && xdebug_sapi_is_frankenphp()) {
 		xdebug_frankenphp_mshutdown();
 	}
 

@@ -78,8 +78,9 @@ static int xdebug_frankenphp_sapi_deactivate(void)
 	return original_sapi_deactivate ? original_sapi_deactivate() : SUCCESS;
 }
 
-/* Consumed by xdebug_execute_user_code_begin() on the first user code
- * executed for a new worker request. Runs the same activation checks that
+/* Called by xdebug_execute_user_code_begin() on the first user code executed
+ * for a new worker request, when xdebug_frankenphp_reinit_pending() says a
+ * re-initialisation was armed. Runs the same activation checks that
  * xdebug_debug_init_if_requested_at_startup() runs for a regular request:
  * triggers (including xdebug.trigger_value validation), XDEBUG_SESSION_START/
  * XDEBUG_SESSION_STOP handling, and xdebug.start_with_request=yes.
@@ -87,11 +88,8 @@ static int xdebug_frankenphp_sapi_deactivate(void)
  * The superglobals were re-armed by FrankenPHP for the new request, but are
  * built lazily; force them first so that the trigger detection sees the
  * current request's data (mirrors xdebug_init_auto_globals() in RINIT). */
-void xdebug_frankenphp_reinit_if_requested(void)
+void xdebug_frankenphp_request_reinit(void)
 {
-	if (!XG_DBG(context).do_request_reinit) {
-		return;
-	}
 	XG_DBG(context).do_request_reinit = 0;
 
 	zend_is_auto_global_str((char*) ZEND_STRL("_GET"));
@@ -103,13 +101,14 @@ void xdebug_frankenphp_reinit_if_requested(void)
 	xdebug_debug_init_if_requested_at_startup();
 }
 
+bool xdebug_sapi_is_frankenphp(void)
+{
+	return sapi_module.name && strcmp(sapi_module.name, "frankenphp") == 0;
+}
+
 void xdebug_frankenphp_minit(void)
 {
 	if (hooks_installed) {
-		return;
-	}
-
-	if (!sapi_module.name || strcmp(sapi_module.name, "frankenphp") != 0) {
 		return;
 	}
 

@@ -2,7 +2,7 @@
 /* Minimal DBGp client used by run-tests.sh: accepts connections from Xdebug,
  * logs each session, answers "run", then completes the stopping handshake.
  *
- * Usage: php listener.php [port]
+ * Usage: php listener.php [port] [bind-address]
  */
 error_reporting(E_ALL & ~E_WARNING);
 
@@ -20,7 +20,8 @@ function read_packet($conn): string
 }
 
 $port = $argv[1] ?? '9003';
-$srv = stream_socket_server("tcp://127.0.0.1:$port", $errno, $err);
+$bind = $argv[2] ?? '127.0.0.1';
+$srv = stream_socket_server("tcp://$bind:$port", $errno, $err);
 if (!$srv) {
     fwrite(STDERR, "listen failed: $err\n");
     exit(1);

@@ -30,8 +30,16 @@
  * If the SAPI is not "frankenphp", these functions are no-ops.
  */
 
+bool xdebug_sapi_is_frankenphp(void);
 void xdebug_frankenphp_minit(void);
 void xdebug_frankenphp_mshutdown(void);
-void xdebug_frankenphp_reinit_if_requested(void);
+void xdebug_frankenphp_request_reinit(void);
+
+/* Cheap check for the per-function-call hot path in
+ * xdebug_execute_user_code_begin(): non-zero only when the FrankenPHP
+ * activate hook armed a re-initialisation for the current worker request.
+ * The flag is only ever set by the FrankenPHP SAPI hooks, and it is cleared
+ * by RINIT, so it can only be seen armed inside a worker loop. */
+#define xdebug_frankenphp_reinit_pending() (XG(globals.debugger.context.do_request_reinit))
 
 #endif /* __XDEBUG_DEBUGGER_FRANKENPHP_H__ */

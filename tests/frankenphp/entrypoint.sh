@@ -1,7 +1,7 @@
 #!/bin/sh
 # Test-image entrypoint.
 #
-# XDEBUG_CLIENT_HOST: overrides xdebug.client_host (default host.docker.internal).
+# XDEBUG_CLIENT_HOST: overrides xdebug.client_host (default xdebug://gateway).
 # XDEBUG_EXTRA_INI:   extra ini lines (';'-separated) appended to the xdebug ini.
 # DBGP_LISTENER=1:    starts the scripted DBGp client (listener.php) before the
 #                     server, so that connections made during worker boot

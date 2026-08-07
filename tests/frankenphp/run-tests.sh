@@ -24,12 +24,13 @@
 set -e
 cd "$(dirname "$0")/../.."
 
-IMAGE=xdebug-frankenphp-test
-NAME=xdebug-frankenphp-test
+PHP_VERSION=${PHP_VERSION:-8.4}
+IMAGE=xdebug-frankenphp-test-$PHP_VERSION
+NAME=xdebug-frankenphp-test-$PHP_VERSION
 PORT=${PORT:-18080}
 
-echo "=== building image (this compiles Xdebug against FrankenPHP's ZTS PHP) ==="
-docker build -q -f tests/frankenphp/Dockerfile -t $IMAGE . >/dev/null
+echo "=== building image (this compiles Xdebug against FrankenPHP's ZTS PHP $PHP_VERSION) ==="
+docker build -q --build-arg PHP_VERSION="$PHP_VERSION" -f tests/frankenphp/Dockerfile -t $IMAGE . >/dev/null
 
 cleanup() { docker rm -f $NAME >/dev/null 2>&1 || true; }
 trap cleanup EXIT
