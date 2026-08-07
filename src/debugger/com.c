@@ -55,6 +55,7 @@
 #include "ip_info.h"
 #include "lib/crc32.h"
 #include "lib/log.h"
+#include "lib/trim.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -552,6 +553,33 @@ static int ide_key_is_cloud_id()
 	return 1;
 }
 
+static bool is_opcache_enabled()
+{
+	zend_string *opcache_enable = ZSTR_INIT_LITERAL("opcache.enable", 0);
+	zend_string *opcache_enable_cli = ZSTR_INIT_LITERAL("opcache.enable_cli", 0);
+	zend_string *opcache_optimization_level = ZSTR_INIT_LITERAL("opcache.optimization_level", 0);
+
+	zend_string *opcache_enable_v = zend_ini_get_value(opcache_enable);
+	zend_string *opcache_enable_cli_v = zend_ini_get_value(opcache_enable_cli);
+	zend_string *opcache_optimization_level_v = zend_ini_get_value(opcache_optimization_level);
+
+	zend_string_release(opcache_enable);
+	zend_string_release(opcache_enable_cli);
+	zend_string_release(opcache_optimization_level);
+
+	if (!opcache_enable_v || zend_string_equals_literal(opcache_enable_v, "0")) {
+		return false;
+	}
+	if (!opcache_enable_cli_v || zend_string_equals_literal(opcache_enable_cli_v, "0")) {
+		return false;
+	}
+	if (!opcache_optimization_level_v || zend_string_equals_literal(opcache_optimization_level_v, "0")) {
+		return false;
+	}
+
+	return true;
+}
+
 static void warn_if_opcache_is_loaded_after_xdebug()
 {
 	bool xdebug_loaded = false;
@@ -565,7 +593,7 @@ static void warn_if_opcache_is_loaded_after_xdebug()
 			xdebug_loaded = true;
 		}
 
-		if (strcmp(zext->name, "Zend OPcache") == 0) {
+		if (strcmp(zext->name, "Zend OPcache") == 0 && is_opcache_enabled()) {
 			if (xdebug_loaded) {
 				xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "OPCACHE", "Debugger is not working optimally, as Xdebug is loaded before Zend OPcache");
 			}
@@ -616,6 +644,10 @@ static void xdebug_init_debugger()
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "TIMEOUT", "Time-out connecting to debugging client, waited: " ZEND_LONG_FMT " ms. Tried: %s.", XINI_DBG(connect_timeout_ms), connection_attempts->d);
 	} else if (XG_DBG(context).socket == -3) {
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOPERM", "No permission connecting to debugging client (%s). This could be SELinux related.", connection_attempts->d);
+	}
+
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+        XG_BASE(statement_handler_enabled) = XG_DBG(remote_connection_enabled);
 	}
 
 	xdebug_str_free(connection_attempts);
@@ -818,6 +850,10 @@ void xdebug_debug_init_if_requested_at_startup(void)
 			xdebug_update_ide_key(found_trigger_value);
 		}
 		xdebug_init_debugger();
+	} else {
+        if (!XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+            XG_BASE(statement_handler_enabled) = false;
+        }
 	}
 
 	if (found_trigger_value) {

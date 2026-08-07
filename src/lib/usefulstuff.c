@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@
 # include <process.h>
 #endif
 
-#include "php_xdebug.h"
+#include "compat.h"
 
 #include "mm.h"
 #include "crc32.h"
@@ -137,6 +137,19 @@ void xdebug_explode(const char *delim, const char *str, xdebug_arg *args, int li
 	}
 }
 
+bool xdebug_is_printable(const char *str, size_t len)
+{
+	size_t i;
+
+	for (i = 0; i < len; i++) {
+		if (!isprint(str[i])) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 const char* xdebug_memnstr(const char *haystack, const char *needle, int needle_len, const char *end)
 {
 	const char *p = haystack;
@@ -168,34 +181,6 @@ char* xdebug_strrstr(const char* haystack, const char* needle)
 	}
 
 	return loc;
-}
-
-char *xdebug_trim(const char *str)
-{
-	char *trimmed = NULL, *begin = (char *) str, *end = NULL;
-
-	/* trim leading space */
-	while (isspace((unsigned char) *begin)) {
-		++begin;
-	}
-
-	/* All spaces */
-	if (*begin == '\0') {
-		return xdstrdup("");
-	}
-
-	/* trim trailing space */
-	end = begin + strlen(begin) - 1;
-	while (end > begin && isspace((unsigned char) *end)) {
-		--end;
-	}
-	end++;
-
-	trimmed = xdmalloc(end - begin + 1);
-	memcpy(trimmed, begin, (end - begin));
-	trimmed[(end - begin)] = '\0';
-
-	return trimmed;
 }
 
 /* not all versions of php export this */
@@ -286,7 +271,7 @@ char *xdebug_path_from_url(zend_string *fileurl)
 
 	if (tmp) {
 		fp = tmp + 7;
-		if (fp[0] == '/' && fp[2] == ':') {
+		if (fp[0] == '/' && fp[1] != '\0' && fp[2] == ':') {
 			fp++;
 		}
 		ret = xdstrdup(fp);
@@ -308,19 +293,19 @@ char *xdebug_path_from_url(zend_string *fileurl)
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_to_url(zend_string *fileurl)
+static char *xdebug_path_to_url(const char *fileurl, size_t fileurl_len)
 {
 	int l, i, new_len;
 	char *tmp = NULL;
 	char *encoded_fileurl;
 
 	/* encode the url */
-	encoded_fileurl = xdebug_raw_url_encode(ZSTR_VAL(fileurl), ZSTR_LEN(fileurl), &new_len, 1);
+	encoded_fileurl = xdebug_raw_url_encode(fileurl, fileurl_len, &new_len, 1);
 
-	if (strstr(ZSTR_VAL(fileurl), "://") != NULL && strstr(ZSTR_VAL(fileurl), "://") < strstr(ZSTR_VAL(fileurl), "/")) {
+	if (strstr(fileurl, "://") != NULL && strstr(fileurl, "://") < strstr(fileurl, "/")) {
 		/* ignore, some form of stream wrapper scheme */
-		tmp = xdstrdup(ZSTR_VAL(fileurl));
-	} else if (ZSTR_VAL(fileurl)[0] != '/' && ZSTR_VAL(fileurl)[0] != '\\' && ZSTR_VAL(fileurl)[1] != ':') {
+		tmp = xdstrdup(fileurl);
+	} else if (fileurl[0] != '/' && fileurl[0] != '\\' && fileurl[1] != ':') {
 		/* convert relative paths */
 		cwd_state new_state;
 		char cwd[MAXPATHLEN];
@@ -334,21 +319,21 @@ char *xdebug_path_to_url(zend_string *fileurl)
 		new_state.cwd = estrdup(cwd);
 		new_state.cwd_length = strlen(cwd);
 
-		if (!virtual_file_ex(&new_state, ZSTR_VAL(fileurl), NULL, 1)) {
+		if (!virtual_file_ex(&new_state, fileurl, NULL, 1)) {
 			char *s = estrndup(new_state.cwd, new_state.cwd_length);
 			tmp = xdebug_sprintf("file://%s",s);
 			efree(s);
 		}
 		efree(new_state.cwd);
 
-	} else if (ZSTR_VAL(fileurl)[1] == '/' || ZSTR_VAL(fileurl)[1] == '\\') {
+	} else if (fileurl[1] == '/' || fileurl[1] == '\\') {
 		/* convert UNC paths (eg. \\server\sharepath) */
 		/* See https://docs.microsoft.com/en-us/archive/blogs/ie/file-uris-in-windows */
 		tmp = xdebug_sprintf("file:%s", encoded_fileurl);
-	} else if (ZSTR_VAL(fileurl)[0] == '/' || ZSTR_VAL(fileurl)[0] == '\\') {
+	} else if (fileurl[0] == '/' || fileurl[0] == '\\') {
 		/* convert *nix paths (eg. /path) */
 		tmp = xdebug_sprintf("file://%s", encoded_fileurl);
-	} else if (ZSTR_VAL(fileurl)[1] == ':') {
+	} else if (fileurl[1] == ':') {
 		/* convert windows drive paths (eg. c:\path) */
 		tmp = xdebug_sprintf("file:///%s", encoded_fileurl);
 	} else {
@@ -364,6 +349,16 @@ char *xdebug_path_to_url(zend_string *fileurl)
 	}
 	xdfree(encoded_fileurl);
 	return tmp;
+}
+
+char *xdebug_zstr_path_to_url(zend_string *string)
+{
+	return xdebug_path_to_url(ZSTR_VAL(string), ZSTR_LEN(string));
+}
+
+char *xdebug_xdebug_str_path_to_url(xdebug_str *string)
+{
+	return xdebug_path_to_url(XDEBUG_STR_VAL(string), XDEBUG_STR_LEN(string));
 }
 
 #ifndef PHP_WIN32
@@ -434,7 +429,7 @@ FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **
 	} else {
 		tmp_fname = xdstrdup(fname);
 	}
-	r = stat(tmp_fname, &buf);
+	r = lstat(tmp_fname, &buf);
 	/* We're not freeing "tmp_fname" as that is used in the freopen as well. */
 
 	if (r == -1) {
@@ -443,10 +438,16 @@ FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **
 		goto lock;
 	}
 
-	/* 3. It exists, check if we can open it. */
+	/* 3. If the file exists, but is a symlink, we need to not follow it, and instead create a new file */
+	if (S_ISLNK(buf.st_mode)) {
+		fh = xdebug_open_file_with_random_ext(fname, "w", extension, new_fname);
+		goto lock;
+	}
+
+	/* 4. It exists, check if we can open it. */
 	fh = xdebug_open_file(fname, "r+", extension, new_fname);
 	if (!fh) {
-		/* 4. If fh == null we couldn't even open the file, so open a new one with a new name */
+		/* If fh == null we couldn't even open the file, so open a new one with a new name */
 		fh = xdebug_open_file_with_random_ext(fname, "w", extension, new_fname);
 		goto lock;
 	}
@@ -599,7 +600,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				case 'S': { /* session id */
 					zval *data;
 					char *char_ptr, *strval;
-					char *sess_name;
+					const char *sess_name;
 
 					sess_name = zend_ini_string((char*) "session.name", sizeof("session.name"), 0);
 
@@ -620,6 +621,11 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 
 				case '%': /* literal % */
 					xdebug_str_addc(&fname, '%');
+					break;
+
+				case '\0': /* trailing % */
+					xdebug_str_addc(&fname, '%');
+					format--;
 					break;
 			}
 		}
@@ -654,6 +660,11 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 
 				case '%': /* literal % */
 					xdebug_str_addc(&fname, '%');
+					break;
+
+				case '\0': /* trailing % */
+					xdebug_str_addc(&fname, '%');
+					format--;
 					break;
 			}
 		}
@@ -712,6 +723,11 @@ int xdebug_format_filename(char **formatted_name, const char *default_fmt, zend_
 					break;
 				case '%': /* literal % */
 					xdebug_str_addc(&fname, '%');
+					break;
+
+				case '\0': /* trailing % */
+					xdebug_str_addc(&fname, '%');
+					format--;
 					break;
 			}
 		}

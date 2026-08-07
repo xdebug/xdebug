@@ -25,9 +25,9 @@ Version: %d.%s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 2	1	1	%d.%d	%d
-2	7	0	%d.%d	%d	setlocale	0		%sbug00843-001.php	4	8	%d	'ro_RO.UTF-8'	'de_DE.UTF-8'	'de_DE'	'de'	'german'	'ge'	'de_DE.ISO-8859-1'
-2	7	1	%d.%d	%d
-2	7	R			'%s'
-2	8	0	%d.%d	%d	xdebug_stop_trace	0		%sbug00843-001.php	6	0
+2	%d	0	%d.%d	%d	setlocale	0		%sbug00843-001.php	4	8	%d	'ro_RO.UTF-8'	'de_DE.UTF-8'	'de_DE'	'de'	'german'	'ge'	'de_DE.ISO-8859-1'
+2	%d	1	%d.%d	%d
+2	%d	R			'%s'
+2	%d	0	%d.%d	%d	xdebug_stop_trace	0		%sbug00843-001.php	6	0
 			%d%c%d	%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

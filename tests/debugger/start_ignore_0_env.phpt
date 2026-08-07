@@ -4,7 +4,7 @@ Starting Debugger: always, but ignore value is '0' (ENV)
 <?php
 require 'dbgp/dbgpclient.php';
 
-$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_ignore_0_env.txt';
+$xdebugLogFileName = getTmpFile('start_ignore_0_env.txt');
 @unlink( $xdebugLogFileName );
 
 dbgpRunFile(

@@ -43,7 +43,7 @@ Call Stack:
 %w%f %w%d   2. var_dump(%s) %sbug01166.php:%d
 
 
-Fatal error: __debuginfo() must return an array in %sbug01166.php on line %d
+Fatal error: __debug%snfo() must return an array in %sbug01166.php on line %d
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01166.php:0

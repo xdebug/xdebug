@@ -37,18 +37,18 @@ xdebug_stop_trace();
 Version: %s
 File format: 4
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-2		A						%scapture-trace.inc	17	$tf = '%s'
-2	1	1	%f	%d
-2	7	0	%f	%d	Test->__construct	1		%sbug02127-002-php84.php	18	0
-3	8	0	%f	%d	Exception->__construct	0		%sbug02127-002-php84.php	13	0
-3	8	1	%f	%d
-3	8	R			NULL
-3	9	0	%f	%d	Closure::bind	0		%sbug02127-002-php84.php	10	3	class Closure { public $name = '{closure:Test::__construct():11}'; public $file = '%sbug02127-002-php84.php'; public $line = 11; public $parameter = ['$a' => '<required>', '$b' => '<required>'] }	NULL	class Exception@anonymous { protected $message = ''; private string ${Exception}string = ''; protected $code = 0; protected string $file = '%sbug02127-002-php84.php'; protected int $line = 13; private array ${Exception}trace = [0 => [...]]; private ?Throwable ${Exception}previous = NULL }
-3	9	1	%f	%d
-3	9	R			class Closure { public $name = '{closure:Test::__construct():11}'; public $file = '%sbug02127-002-php84.php'; public $line = 11; public $parameter = ['$a' => '<required>', '$b' => '<required>'] }
+2		A						%scapture-trace.inc	%d	$tf = '%s'
+2	%d	1	%f	%d
+2	%d	0	%f	%d	Test->__construct	1		%sbug02127-002-php84.php	18	0
+3	%d	0	%f	%d	Exception->__construct	0		%sbug02127-002-php84.php	13	0
+3	%d	1	%f	%d
+3	%d	R			NULL
+3	%d	0	%f	%d	Closure::bind	0		%sbug02127-002-php84.php	10	3	class Closure { public $name = '{closure:Test::__construct():11}'; public $file = '%sbug02127-002-php84.php'; public $line = 11; public $parameter = ['$a' => '<required>', '$b' => '<required>'] }	NULL	class Exception@anonymous { protected $message = ''; private string ${Exception}string = ''; protected $code = 0; protected string $file = '%sbug02127-002-php84.php'; protected int $line = 13; private array ${Exception}trace = [0 => [...]]; private ?Throwable ${Exception}previous = NULL }
+3	%d	1	%f	%d
+3	%d	R			class Closure { public $name = '{closure:Test::__construct():11}'; public $file = '%sbug02127-002-php84.php'; public $line = 11; public $parameter = ['$a' => '<required>', '$b' => '<required>'] }
 2		A						%sbug02127-002-php84.php	10	$this->configureException = class Closure { public $name = '{closure:Test::__construct():11}'; public $file = '%sbug02127-002-php84.php'; public $line = 11; public $parameter = ['$a' => '<required>', '$b' => '<required>'] }
-2	7	1	%f	%d
+2	%d	1	%f	%d
 1		A						%sbug02127-002-php84.php	18	$t = class Test { private $configureException = class Closure { public $name = '{closure:Test::__construct():11}'; public $file = '%sbug02127-002-php84.php'; public $line = 11; public $parameter = [...] } }
-2	10	0	%f	%d	xdebug_stop_trace	0		%sbug02127-002-php84.php	20	0
+2	%d	0	%f	%d	xdebug_stop_trace	0		%sbug02127-002-php84.php	20	0
 			%f	%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

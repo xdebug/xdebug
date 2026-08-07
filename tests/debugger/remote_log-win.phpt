@@ -10,17 +10,18 @@ I_LIKE_COOKIES=doesnotexist3
 --INI--
 xdebug.mode=debug
 xdebug.start_with_request=yes
-xdebug.log=C:\Windows\Temp\remote-log4.txt
+xdebug.log=C:\Windows\Temp\remote-log-win.txt
 xdebug.discover_client_host=1
 xdebug.client_host=doesnotexist2
 xdebug.client_port=9003
 xdebug.client_discovery_header=I_LIKE_COOKIES
+xdebug.control_socket=off
 --FILE--
 <?php
-@unlink ("C:\\Windows\\Temp\\remote-log4.txt");
+@unlink ("C:\\Windows\\Temp\\remote-log-win.txt");
 echo strlen("foo"), "\n";
-echo file_get_contents("C:\\Windows\\Temp\\remote-log4.txt");
-@unlink ("C:\\Windows\\Temp\\remote-log4.txt");
+echo file_get_contents("C:\\Windows\\Temp\\remote-log-win.txt");
+@unlink ("C:\\Windows\\Temp\\remote-log-win.txt");
 ?>
 --EXPECTF--
 3

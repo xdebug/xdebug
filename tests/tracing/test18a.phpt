@@ -31,23 +31,23 @@ bar
 Version: %d.%s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-2	1	1	%f	%d
-2	7	0	%f	%d	foo	1		%stest18a.php	14	0
-3	8	0	%f	%d	bar	1		%stest18a.php	11	0
-3	8	1	%f	%d
-2	7	1	%f	%d
-2	9	0	%f	%d	eval	1	'$foo = foo();\nbar();\nfoo();\n'	%stest18a.php	16	0
-3	10	0	%f	%d	foo	1		%stest18a.php(16) : eval()'d code	1	0
-4	11	0	%f	%d	bar	1		%stest18a.php	11	0
-4	11	1	%f	%d
-3	10	1	%f	%d
-3	12	0	%f	%d	bar	1		%stest18a.php(16) : eval()'d code	2	0
-3	12	1	%f	%d
-3	13	0	%f	%d	foo	1		%stest18a.php(16) : eval()'d code	3	0
-4	14	0	%f	%d	bar	1		%stest18a.php	11	0
-4	14	1	%f	%d
-3	13	1	%f	%d
-2	9	1	%f	%d
-2	15	0	%f	%d	xdebug_stop_trace	0		%stest18a.php	18	0
+2	%d	1	%f	%d
+2	%d	0	%f	%d	foo	1		%stest18a.php	14	0
+3	%d	0	%f	%d	bar	1		%stest18a.php	11	0
+3	%d	1	%f	%d
+2	%d	1	%f	%d
+2	%d	0	%f	%d	eval	1	'$foo = foo();\nbar();\nfoo();\n'	%stest18a.php	16	0
+3	%d	0	%f	%d	foo	1		%stest18a.php(16) : eval()'d code	1	0
+4	%d	0	%f	%d	bar	1		%stest18a.php	11	0
+4	%d	1	%f	%d
+3	%d	1	%f	%d
+3	%d	0	%f	%d	bar	1		%stest18a.php(16) : eval()'d code	2	0
+3	%d	1	%f	%d
+3	%d	0	%f	%d	foo	1		%stest18a.php(16) : eval()'d code	3	0
+4	%d	0	%f	%d	bar	1		%stest18a.php	11	0
+4	%d	1	%f	%d
+3	%d	1	%f	%d
+2	%d	1	%f	%d
+2	%d	0	%f	%d	xdebug_stop_trace	0		%stest18a.php	18	0
 			%f	%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

@@ -169,36 +169,6 @@ static PHP_INI_MH(OnUpdateStartUponError)
 	return SUCCESS;
 }
 
-static PHP_INI_MH(OnUpdateRemovedSetting)
-{
-	if (! (EG(error_reporting) & E_DEPRECATED)) {
-		return SUCCESS;
-	}
-	if (new_value && ZSTR_LEN(new_value) > 0 && strncmp("This setting", ZSTR_VAL(new_value), 11) != 0) {
-		xdebug_log_ex(
-			XLOG_CHAN_CONFIG, XLOG_CRIT, "REMOVED",
-			"The setting '%s' has been removed, see the upgrading guide at %supgrade_guide#changed-%s",
-			ZSTR_VAL(entry->name), xdebug_lib_docs_base(), ZSTR_VAL(entry->name)
-		);
-	}
-	return FAILURE;
-}
-
-static PHP_INI_MH(OnUpdateChangedSetting)
-{
-	if (! (EG(error_reporting) & E_DEPRECATED)) {
-		return SUCCESS;
-	}
-	if (new_value && ZSTR_LEN(new_value) > 0 && strncmp("This setting", ZSTR_VAL(new_value), 11) != 0) {
-		xdebug_log_ex(
-			XLOG_CHAN_CONFIG, XLOG_CRIT, "CHANGED",
-			"The setting '%s' has been renamed, see the upgrading guide at %supgrade_guide#changed-%s",
-			ZSTR_VAL(entry->name), xdebug_lib_docs_base(), ZSTR_VAL(entry->name)
-		);
-	}
-	return FAILURE;
-}
-
 #if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 static PHP_INI_MH(OnUpdateCtrlSocket)
 {
@@ -251,9 +221,6 @@ ZEND_INI_DISP(display_control_socket)
 	}
 }
 #endif
-
-#define XDEBUG_REMOVED_INI_ENTRY(n) PHP_INI_ENTRY_EX(("" # n), "This setting has been removed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#removed-" # n, PHP_INI_ALL, OnUpdateRemovedSetting, display_removed_setting)
-#define XDEBUG_CHANGED_INI_ENTRY(n) PHP_INI_ENTRY_EX(("" # n), "This setting has been changed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-" # n, PHP_INI_ALL, OnUpdateChangedSetting, display_changed_setting)
 
 static const char *xdebug_start_with_request_types[5] = { "", "default", "yes", "no", "trigger" };
 
@@ -316,6 +283,7 @@ PHP_INI_BEGIN()
 #if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	PHP_INI_ENTRY_EX("xdebug.control_socket",      "default",               PHP_INI_ALL,                   OnUpdateCtrlSocket, display_control_socket)
 #endif
+	STD_PHP_INI_ENTRY("xdebug.path_mapping",       "0",                     PHP_INI_ALL,                   OnUpdateBool,   settings.library.path_mapping,     zend_xdebug_globals, xdebug_globals)
 
 	STD_PHP_INI_ENTRY("xdebug.log",       "",           PHP_INI_ALL, OnUpdateString, settings.library.log,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.log_level", XLOG_DEFAULT, PHP_INI_ALL, OnUpdateLong,   settings.library.log_level, zend_xdebug_globals, xdebug_globals)
@@ -379,33 +347,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.collect_assignments", "0",              PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_assignments, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_params", "1",                   PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_return,    zend_xdebug_globals, xdebug_globals)
-
-	/* Removed/Changed settings */
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.auto_trace)
-	XDEBUG_REMOVED_INI_ENTRY(xdebug.collect_includes)
-	XDEBUG_REMOVED_INI_ENTRY(xdebug.collect_vars)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.coverage_enable)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.default_enable)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.gc_stats_enable)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.gc_stats_output_dir)
-	XDEBUG_REMOVED_INI_ENTRY(xdebug.overload_var_dump)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.profiler_enable)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.profiler_enable_trigger)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.profiler_enable_trigger_value)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.profiler_output_dir)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.remote_autostart)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.remote_connect_back)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.remote_enable)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.remote_host)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.remote_log)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.remote_log_level)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.remote_mode)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.remote_port)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.remote_timeout)
-	XDEBUG_REMOVED_INI_ENTRY(xdebug.show_mem_delta)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.trace_output_dir)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.trace_enable_trigger)
-	XDEBUG_CHANGED_INI_ENTRY(xdebug.trace_enable_trigger_value)
 PHP_INI_END()
 
 static void xdebug_init_base_globals(xdebug_base_globals_t *xg)
@@ -417,6 +358,7 @@ static void xdebug_init_base_globals(xdebug_base_globals_t *xg)
 	xg->in_var_serialisation = 0;
 	xg->error_reporting_override   = 0;
 	xg->error_reporting_overridden = 0;
+	xg->statement_handler_enabled  = false;
 
 	xg->filter_type_code_coverage = XDEBUG_FILTER_NONE;
 	xg->filter_type_stack         = XDEBUG_FILTER_NONE;
@@ -763,8 +705,8 @@ PHP_MINFO_FUNCTION(xdebug)
 
 ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 {
-	zend_op_array *op_array = &frame->func->op_array;
-	int                   lineno;
+	zend_op_array *op_array;
+	int            lineno;
 
 	if (XDEBUG_MODE_IS_OFF()) {
 		return;
@@ -774,6 +716,15 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 		return;
 	}
 
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
+	xdebug_control_socket_dispatch();
+#endif
+
+	if (!XG_BASE(statement_handler_enabled)) {
+		return;
+	}
+
+	op_array = &frame->func->op_array;
 	lineno = EG(current_execute_data)->opline->lineno;
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
@@ -783,10 +734,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_statement_call(op_array->filename, lineno);
 	}
-
-#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
-	xdebug_control_socket_dispatch();
-#endif
 }
 
 ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
@@ -831,7 +778,9 @@ ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
 		return;
 	}
 
-	xdebug_coverage_init_oparray(op_array);
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+		xdebug_coverage_init_oparray(op_array);
+	}
 }
 
 #ifndef ZEND_EXT_API

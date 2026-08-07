@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans <derick@xdebug.org>           |
+   | Copyright (c) 2002-2026 Derick Rethans <derick@xdebug.org>           |
    |           (c) 1997-2004 Jim Winstead <jimw@trainedmonkey.com>        |
    |           (c) 1998-2004 Andi Gutmans <andi@zend.com> and             |
    |                         Zeev Suraski <zeev@zend.com>                 |
@@ -127,7 +127,7 @@ static unsigned char *xdebug_base64_encode_impl(const unsigned char *in, size_t 
 }
 /* }}} */
 
-static int xdebug_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, zend_bool strict) /* {{{ */
+static bool xdebug_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, zend_bool strict) /* {{{ */
 {
 	int ch;
 	size_t i = 0, padding = 0, j = *outl;
@@ -190,10 +190,10 @@ static int xdebug_base64_decode_impl(const unsigned char *in, size_t inl, unsign
 	*outl = j;
 	out[j] = '\0';
 
-	return 1;
+	return true;
 
 fail:
-	return 0;
+	return false;
 }
 /* }}} */
 
@@ -210,9 +210,15 @@ unsigned char *xdebug_base64_encode(unsigned char *data, size_t data_len, size_t
 
 unsigned char *xdebug_base64_decode(unsigned char *data, size_t data_len, size_t *new_len)
 {
+	bool           ok;
 	unsigned char *retval = xdmalloc(data_len + 1);
 
-	xdebug_base64_decode_impl(data, data_len, retval, new_len, 0);
+	ok = xdebug_base64_decode_impl(data, data_len, retval, new_len, true);
+
+	if (!ok) {
+		xdfree(retval);
+		return NULL;
+	}
 
 	return retval;
 }
@@ -283,67 +289,6 @@ do_escape:
 	return new_str;
 }
 
-void xdebug_stripcslashes(char *str, int *len)
-{
-	char *source, *target, *end;
-	int  nlen = *len, i;
-	char numtmp[4];
-
-	for (source=str, end=str+nlen, target=str; source < end; source++) {
-		if (*source == '\\' && source+1 < end) {
-			source++;
-			switch (*source) {
-				case 'n':  *target++='\n'; nlen--; break;
-				case 'r':  *target++='\r'; nlen--; break;
-				case 'a':  *target++='\a'; nlen--; break;
-				case 't':  *target++='\t'; nlen--; break;
-				case 'v':  *target++='\v'; nlen--; break;
-				case 'b':  *target++='\b'; nlen--; break;
-				case 'f':  *target++='\f'; nlen--; break;
-				case '\\': *target++='\\'; nlen--; break;
-				case 'x':
-					if (source+1 < end && isxdigit((int)(*(source+1)))) {
-						numtmp[0] = *++source;
-						if (source+1 < end && isxdigit((int)(*(source+1)))) {
-							numtmp[1] = *++source;
-							numtmp[2] = '\0';
-							nlen-=3;
-						} else {
-							numtmp[1] = '\0';
-							nlen-=2;
-						}
-						*target++=(char)strtol(numtmp, NULL, 16);
-						break;
-					}
-					XDEBUG_BREAK_INTENTIONALLY_MISSING
-
-				default:
-					i=0;
-					while (source < end && *source >= '0' && *source <= '7' && i<3) {
-						numtmp[i++] = *source++;
-					}
-					if (i) {
-						numtmp[i]='\0';
-						*target++=(char)strtol(numtmp, NULL, 8);
-						nlen-=i;
-						source--;
-					} else {
-						*target++=*source;
-						nlen--;
-					}
-			}
-		} else {
-			*target++=*source;
-		}
-	}
-
-	if (nlen != 0) {
-		*target='\0';
-	}
-
-	*len = nlen;
-}
-
 zend_ulong xdebug_get_pid(void)
 {
 #ifndef ZTS
@@ -365,7 +310,11 @@ void xdebug_setcookie(const char *name, int name_len, char *value, int value_len
 	zend_string *domain_s = domain ? zend_string_init(domain, domain_len, 0) : NULL;
 	zend_string *samesite_s = zend_string_init("Lax", sizeof("Lax") - 1, 0);
 
+#if PHP_VERSION_ID >= 80500
+	php_setcookie(name_s, value_s, expires, path_s, domain_s, secure, httponly, samesite_s, false, url_encode);
+#else
 	php_setcookie(name_s, value_s, expires, path_s, domain_s, secure, httponly, samesite_s, url_encode);
+#endif
 
 	zend_string_release(samesite_s);
 	name ? zend_string_release(name_s) : 0;

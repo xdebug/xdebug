@@ -53,12 +53,12 @@ Version: %s
 File format: 4
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 2		A						%s	%d	$tf = '%s'
-2	1	1	%f	%d
+2	%d	1	%f	%d
 1		A						%strace_enum-002.php	9	$lang = enum Language::Gàidhlig
 1		A						%strace_enum-002.php	15	$eur = enum Currency::EUR('€')
 1		A						%strace_enum-002.php	23	$time = enum Unit::Hour(3600)
-2	7	0	%f	%d	xdebug_var_dump	0		%strace_enum-002.php	25	3	enum Language::Gàidhlig	enum Currency::EUR('€')	enum Unit::Hour(3600)
-2	7	1	%f	%d
-2	8	0	%f	%d	xdebug_stop_trace	0		%strace_enum-002.php	28	0
+2	%d	0	%f	%d	xdebug_var_dump	0		%strace_enum-002.php	25	3	enum Language::Gàidhlig	enum Currency::EUR('€')	enum Unit::Hour(3600)
+2	%d	1	%f	%d
+2	%d	0	%f	%d	xdebug_stop_trace	0		%strace_enum-002.php	28	0
 			%f	%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

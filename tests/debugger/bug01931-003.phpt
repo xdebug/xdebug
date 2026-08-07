@@ -17,6 +17,7 @@ $commands = array(
 	'context_get -d 0',
 	'context_get -d 1',
 	'context_get -d 2',
+	'stop',
 );
 
 $settings = [
@@ -49,3 +50,7 @@ dbgpRunFile( $filename, $commands, $settings );
 -> context_get -i 5 -d 2
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="5" context="0"><property name="$array" fullname="$array" type="array" children="1" numchildren="3" page="0" pagesize="32"><property name="0" fullname="$array[0]" type="string" size="3" encoding="base64"><![CDATA[b25l]]></property><property name="1" fullname="$array[1]" type="string" size="3" encoding="base64"><![CDATA[dHdv]]></property><property name="2" fullname="$array[2]" type="string" size="5" encoding="base64"><![CDATA[dGhyZWU=]]></property></property><property name="$main_local" fullname="$main_local" type="int"><![CDATA[42]]></property></response>
+
+-> stop -i 6
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stop" transaction_id="6" status="stopped" reason="ok"></response>

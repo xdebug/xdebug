@@ -20,7 +20,7 @@
 #include "zend.h"
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
-#include "ext/standard/php_smart_string.h"
+#include "zend_smart_string.h"
 #include "zend_smart_str.h"
 #include "zend_closures.h"
 
@@ -32,6 +32,7 @@
 #include "lib/var.h"
 #include "lib/var_export_html.h"
 #include "lib/var_export_line.h"
+#include "lib/xdebug_strndup.h"
 #include "lib/xml.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
@@ -426,6 +427,16 @@ static void fetch_zval_from_symbol_table(
 				goto cleanup;
 			}
 
+			/* Return special exception value if set and enabled */
+			if (
+				XG_DBG(context).virtual_exception_value &&
+				EG(exception) &&
+				(strncmp(name, XDEBUG_EXCEPTION_VALUE_VAR_NAME, name_length) == 0)
+			) {
+				ZVAL_OBJ_COPY(&tmp_retval, EG(exception));
+				goto cleanup;
+			}
+
 			/* Check for compiled vars */
 			element = prepare_search_key(name, &element_length, "", 0);
 			if (xdebug_lib_has_active_data() && xdebug_lib_has_active_function()) {
@@ -808,7 +819,7 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 						state = 1;
 						keyword_end = &ptr[ctr];
 
-						if (strncmp(keyword, "::", 2) == 0 && active_fse->function.object_class) { /* static class properties */
+						if (strncmp(keyword, "::", 2) == 0 && active_fse && active_fse->function.object_class) { /* static class properties */
 							zend_class_entry *ce = zend_fetch_class(active_fse->function.object_class, ZEND_FETCH_CLASS_SELF);
 
 							current_classname = estrdup(STR_NAME_VAL(ce->name));

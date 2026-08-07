@@ -11,6 +11,6 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 cd ${DIR}/..
 
-PATH=/usr/local/php/8.2.8/bin:$PATH
+PATH=/usr/local/php/8.2.19/bin:$PATH
 
 PHP_DIR=/tmp/php-build/workspace/install .xdebugci/test-all.sh '^master|^8.*dev'

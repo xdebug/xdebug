@@ -4,7 +4,7 @@ require_once __DIR__ . '/../utils.inc';
 
 function dump_branch_coverage($info)
 {
-	file_put_contents( getTmpDir() . "xdebug-paths.dot", branch_coverage_to_dot( $info ) );
+	file_put_contents( getTmpFile( "xdebug-paths.dot" ), branch_coverage_to_dot( $info ) );
 	ksort($info);
 
 	foreach ( $info as $fname => $file )

@@ -6,7 +6,7 @@ XDEBUG_SESSION_START=foobar
 <?php
 require 'dbgp/dbgpclient.php';
 
-$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_with_request_trigger_session_start_shared_secret-001.txt';
+$xdebugLogFileName = getTmpFile('start_with_request_trigger_session_start_shared_secret-001.txt');
 @unlink( $xdebugLogFileName );
 
 dbgpRunFile(
@@ -17,7 +17,7 @@ dbgpRunFile(
 		'xdebug.start_with_request' => 'trigger', 'xdebug.trigger_value' => 'not-foobar',
 		'variables_order' => 'PGCS',
 		'xdebug.log' => $xdebugLogFileName, 'xdebug.log_level' => 10,
-		'xdebug.control_socket' => 'off',
+		'xdebug.control_socket' => 'off', 'xdebug.path_mapping' => 'off',
 	],
 	['timeout' => 1]
 );

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,9 +18,9 @@
 #include "main/php_ini.h"
 
 #include "ext/standard/html.h"
-#include "ext/standard/php_smart_string.h"
 #include "zend_exceptions.h"
 #include "zend_generators.h"
+#include "zend_smart_string.h"
 
 #include "monitor.h"
 #include "stack.h"
@@ -871,8 +871,13 @@ char *xdebug_get_printable_stack(int html, int error_type, const char *buffer, c
 	char       *error_type_str = xdebug_error_type(error_type);
 	char       *error_type_str_simple = xdebug_error_type_simple(error_type);
 	xdebug_str  str = XDEBUG_STR_INITIALIZER;
+#if PHP_VERSION_ID >= 80600
+	const char *prepend_string = zend_ini_string_literal("error_prepend_string");
+	const char *append_string = zend_ini_string_literal("error_append_string");
+#else
 	char       *prepend_string = INI_STR((char*) "error_prepend_string");
 	char       *append_string = INI_STR((char*) "error_append_string");
+#endif
 
 	if (prepend_string) {
 		xdebug_str_add(&str, prepend_string, 0);
@@ -939,8 +944,13 @@ static char *xdebug_handle_stack_trace(int type, char *error_type_str, const cha
 	/* We need to see if we have an uncaught exception fatal error now */
 	if (type == E_ERROR && ((tmp_buf = xdebug_strip_php_stack_trace(buffer)) != NULL)) {
 		xdebug_str  str = XDEBUG_STR_INITIALIZER;
+#if PHP_VERSION_ID >= 80600
+		const char *prepend_string = zend_ini_string_literal("error_prepend_string");
+		const char *append_string = zend_ini_string_literal("error_append_string");
+#else
 		char       *prepend_string = INI_STR((char*) "error_prepend_string");
 		char       *append_string = INI_STR((char*) "error_append_string");
+#endif
 
 		if (prepend_string) {
 			xdebug_str_add(&str, prepend_string, 0);
@@ -1175,7 +1185,7 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 				    !SG(headers_sent) &&
 					SG(sapi_headers).http_response_code == 200
 				) {
-					sapi_header_line ctr = { 0, 0, 0 };
+					sapi_header_line ctr = { 0 };
 
 					ctr.line = (char*) "HTTP/1.0 500 Internal Server Error";
 					ctr.line_len = sizeof("HTTP/1.0 500 Internal Server Error") - 1;
@@ -1268,8 +1278,13 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 		}
 		if (PG(display_errors)) {
 			xdebug_str displ_tmp_str = XDEBUG_STR_INITIALIZER;
+#if PHP_VERSION_ID >= 80600
+			const char *prepend_string = zend_ini_string_literal("error_prepend_string");
+			const char *append_string = zend_ini_string_literal("error_append_string");
+#else
 			char *prepend_string = INI_STR((char*) "error_prepend_string");
 			char *append_string = INI_STR((char*) "error_append_string");
+#endif
 
 			if (prepend_string) {
 				xdebug_str_add(&displ_tmp_str, prepend_string, 0);
@@ -1282,7 +1297,7 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 			}
 
 			php_printf("%s", displ_tmp_str.d);
-			xdebug_str_dtor(displ_tmp_str);
+			xdebug_str_destroy(&displ_tmp_str);
 		}
 	}
 }

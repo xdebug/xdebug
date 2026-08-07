@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-#include "usefulstuff.h"
+#include <stdlib.h>
+#include <string.h>
+
 #include "cmd_parser.h"
+#include "stripcslashes.h"
 
 /* {{{ Constants for state machine */
 #define STATE_NORMAL                   0
@@ -48,12 +51,12 @@ int xdebug_cmd_parse(const char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 	int   charescaped = 0;
 	char  opt = ' ', *value_begin = NULL;
 
-	args = xdmalloc(sizeof (xdebug_dbgp_arg));
+	args = (xdebug_dbgp_arg*) xdmalloc(sizeof (xdebug_dbgp_arg));
 	memset(args->value, 0, sizeof(args->value));
 	*cmd = NULL;
 
 	/* Find the end of the command, this is always on the first space */
-	ptr = strchr(line, ' ');
+	ptr = (char*) strchr(line, ' ');
 	if (!ptr) {
 		/* No space found. If the line is not empty, return the line
 		 * and assume it only consists of the command name. If the line
@@ -68,7 +71,7 @@ int xdebug_cmd_parse(const char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 	} else {
 		/* A space was found, so we copy everything before it
 		 * into the cmd parameter. */
-		*cmd = xdcalloc(1, ptr - line + 1);
+		*cmd = (char*) xdcalloc(1, ptr - line + 1);
 		memcpy(*cmd, line, ptr - line);
 	}
 	/* Now we loop until we find the end of the string, which is the \0
@@ -87,6 +90,10 @@ int xdebug_cmd_parse(const char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 			case STATE_OPT_FOLLOWS:
 				opt = *ptr;
 				state = STATE_SEP_FOLLOWS;
+				/* Only accept option letters in [a-z] plus '-' */
+				if ((opt < 'a' || opt > 'z') && opt != '-') {
+					goto parse_error;
+				}
 				break;
 			case STATE_SEP_FOLLOWS:
 				if (*ptr != ' ') {

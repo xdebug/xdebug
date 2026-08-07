@@ -8,9 +8,11 @@ require __DIR__ . '/../utils.inc';
 xdebug.mode=off
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
-var_dump( $tf );
+require __DIR__ . '/../utils.inc';
+
+$tf = xdebug_start_trace(getTmpFile(uniqid('xdt', TRUE)));
+var_dump($tf);
 ?>
 --EXPECTF--
-Notice: Functionality is not enabled in %sbug01954.php on line 2
+Notice: Functionality is not enabled in %sbug01954.php on line %d
 NULL

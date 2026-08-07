@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,7 @@
 #ifndef __HAVE_CMD_PARSER_H__
 #define __HAVE_CMD_PARSER_H__
 
-#include "php_xdebug.h"
-#include "src/lib/usefulstuff.h"
+#include "str.h"
 
 /* Argument structure */
 typedef struct xdebug_dbgp_arg {

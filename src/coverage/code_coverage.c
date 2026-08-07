@@ -1323,6 +1323,8 @@ void xdebug_coverage_register_constants(INIT_FUNC_ARGS)
 
 void xdebug_coverage_rinit(void)
 {
+	xdebug_disable_opcache_optimizer();
+
 	XG_COV(code_coverage_active) = 0;
 	XG_COV(code_coverage_info) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 	XG_COV(dead_code_analysis_tracker_offset) = zend_xdebug_cc_run_offset;

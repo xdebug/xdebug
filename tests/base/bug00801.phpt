@@ -2,6 +2,7 @@
 Test for bug #801: Segfault with streamwrapper, unclosed $fp and xdebug on destruction
 --FILE--
 <?php
+require_once __DIR__ . '/../utils.inc';
 
 class Handler
 {
@@ -25,7 +26,7 @@ class Wrapper
 
     public function stream_open($path, $mode)
     {
-        $this->_fp = fopen(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'asdf', $mode);
+        $this->_fp = fopen(getTmpFile('asdf'), $mode);
 
         return true;
     }
@@ -43,7 +44,9 @@ Manager::$stuff->Logs = new Handler;
 ?>
 --AFTER--
 <?php
-unlink(sys_get_temp_dir() .'/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'asdf');
+require_once __DIR__ . '/../utils.inc';
+
+unlink(getTmpFile('asdf'));
 ?>
 --EXPECT--
 DONE

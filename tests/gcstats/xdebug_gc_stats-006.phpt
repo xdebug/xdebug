@@ -6,9 +6,11 @@ xdebug.start_with_request=default
 zend.enable_gc=1
 --FILE--
 <?php
+require_once __DIR__ . '/../utils.inc';
+
 var_dump(xdebug_get_gcstats_filename());
 
-$filename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'gcstats.' . uniqid('', TRUE). '.txt';
+$filename = getTmpFile('gcstats.' . uniqid('', TRUE). '.txt');
 $actual = xdebug_start_gcstats($filename);
 
 var_dump($actual === $filename);

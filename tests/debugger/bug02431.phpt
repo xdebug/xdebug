@@ -1,0 +1,40 @@
+--TEST--
+Test for bug #2431: Crash when trying to retrieve Windows-style URL with not enough characters
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('dbgp');
+?>
+--FILE--
+<?php
+require 'dbgp/dbgpclient.php';
+$filename = dirname(__FILE__) . '/bug00622.inc';
+
+$commands = array(
+	'step_into',
+	"source -f file:///",
+	'step_into',
+	'detach'
+);
+
+dbgpRunFile( $filename, $commands );
+?>
+--EXPECTF--
+<?xml version="1.0" encoding="iso-8859-1"?>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://bug00622.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
+
+-> step_into -i 1
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="1" status="break" reason="ok"><xdebug:message filename="file://bug00622.inc" lineno="2"></xdebug:message></response>
+
+-> source -i 2 -f file:///
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="source" transaction_id="2" status="break" reason="ok"><error code="100"><message><![CDATA[can not open file]]></message></error></response>
+
+-> step_into -i 3
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file://bug00622.inc" lineno="8"></xdebug:message></response>
+
+-> detach -i 4
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="4" status="stopping" reason="ok"></response>

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -95,6 +95,7 @@ struct _xdebug_con {
 	int                    resolved_breakpoints;
 	int                    breakpoint_details;
 	int                    breakpoint_include_return_value;
+	int                    virtual_exception_value;
 
 	/* Statistics and diagnostics */
 	char *connected_hostname;
@@ -147,14 +148,14 @@ struct _xdebug_remote_handler {
 
 	/* Breakpoints */
 	int (*break_on_line)(xdebug_con *h, xdebug_brk_info *brk, zend_string *filename, int lineno);
-	int (*remote_breakpoint)(xdebug_con *h, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info, zval *return_value);
+	int (*remote_breakpoint)(xdebug_con *h, xdebug_vector *stack, xdebug_str *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info, zval *return_value);
 	int (*resolve_breakpoints)(xdebug_con *h, zend_string *opa);
 
 	/* Output redirection */
 	int (*remote_stream_output)(const char *string, unsigned int length);
 
 	/* Notifications & Logging */
-	int (*remote_notification)(xdebug_con *h, zend_string *file, long lineno, int type, char *type_string, char *message);
+	int (*remote_notification)(xdebug_con *h, xdebug_str *file, long lineno, int type, char *type_string, char *message);
 	int (*user_notification)(xdebug_con *h, zend_string *filename, long lineno, zval *data);
 
 	/* Eval ID registration and removal */

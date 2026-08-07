@@ -31,7 +31,7 @@ xdebug_stop_trace();
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w               => $tf = '%s' %scapture-trace.inc:17
+%w               => $tf = '%s' %scapture-trace.inc:%d
 %w%f %w%d     -> takeThemAll($secret = '[Sensitive Parameter]', $notSecret = 'username') %sbug02104-001.php:12
 %w%f %w%d     -> takeSplat($user = 'username', ...$secrets = variadic(0 => '[Sensitive Parameter]', 1 => '[Sensitive Parameter]')) %sbug02104-001.php:13
 %w%f %w%d     -> xdebug_stop_trace() %sbug02104-001.php:15

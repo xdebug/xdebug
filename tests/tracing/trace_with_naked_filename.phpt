@@ -9,12 +9,14 @@ xdebug.trace_format=0
 xdebug.use_compression=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/bug971' . uniqid('', true), XDEBUG_TRACE_COMPUTERIZED);
+require_once __DIR__ . '/../utils.inc';
+
+$tf = xdebug_start_trace(getTmpFile('bug971' . uniqid('', true)), XDEBUG_TRACE_COMPUTERIZED);
 echo $tf, "\n";
 xdebug_stop_trace();
 unlink($tf);
 
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/bug971' . uniqid('', true), XDEBUG_TRACE_COMPUTERIZED | XDEBUG_TRACE_NAKED_FILENAME);
+$tf = xdebug_start_trace(getTmpFile('bug971' . uniqid('', true)), XDEBUG_TRACE_COMPUTERIZED | XDEBUG_TRACE_NAKED_FILENAME);
 echo $tf, "\n";
 xdebug_stop_trace();
 unlink($tf);

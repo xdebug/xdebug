@@ -47,7 +47,8 @@ PHP_FUNCTION(xdebug_var_dump)
 	args = safe_emalloc(argc, sizeof(zval), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
-		WRONG_PARAM_COUNT;
+		zend_wrong_param_count();
+		RETURN_THROWS();
 	}
 
 	for (i = 0; i < argc; i++) {
@@ -86,7 +87,8 @@ PHP_FUNCTION(xdebug_debug_zval)
 	args = safe_emalloc(argc, sizeof(zval), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
-		WRONG_PARAM_COUNT;
+		zend_wrong_param_count();
+		RETURN_THROWS();
 	}
 
 	if (!(ZEND_CALL_INFO(EG(current_execute_data)->prev_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
@@ -151,7 +153,8 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	args = safe_emalloc(argc, sizeof(zval), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
-		WRONG_PARAM_COUNT;
+		zend_wrong_param_count();
+		RETURN_THROWS();
 	}
 
 	if (!(ZEND_CALL_INFO(EG(current_execute_data)->prev_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {

@@ -15,6 +15,8 @@ xdebug.collect_assignments=0
 xdebug.use_compression=0
 --FILE--
 <?php
+require __DIR__ . '/../utils.inc';
+
 $tf = xdebug_get_tracefile_name();
 
 xdebug_stop_trace();
@@ -31,7 +33,8 @@ if (preg_match('@\.gz$@', $tf)) {
 %s.xt
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d   -> {main}() %s:0
-%w%f %w%d     -> xdebug_get_tracefile_name() %s:2
-%w%f %w%d     -> xdebug_stop_trace() %s:4
+%w%f %w%d     -> require(%s) %s:2
+%w%f %w%d     -> xdebug_get_tracefile_name() %s:4
+%w%f %w%d     -> xdebug_stop_trace() %s:6
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

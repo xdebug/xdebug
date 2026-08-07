@@ -65,6 +65,9 @@ static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, 
 				xdebug_llist_empty(XG_LIB(headers), NULL);
 			case SAPI_HEADER_DELETE:
 			case SAPI_HEADER_SET_STATUS:
+#if PHP_VERSION_ID >= 80500
+			case SAPI_HEADER_DELETE_PREFIX:
+#endif
 				break;
 		}
 	}

@@ -1,0 +1,4 @@
+./dbgp-breakpoint-line.inc = /var/www/projects/xdebug-test/fake-local-file.php
+./file-uri-file1.inc = /var/www/projects/xdebug-test/fake-local-file1.php
+./file-uri-file2.inc:1 = /var/www/projects/xdebug-test/fake-local-file2.php:1
+./file-uri-file2.inc:2-99999 = /var/www/projects/xdebug-test/fake-local-file2.php:3-100000

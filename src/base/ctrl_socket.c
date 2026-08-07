@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
+#ifdef __linux__
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,6 +24,7 @@
 #include <signal.h>
 #include <string.h>
 #include <errno.h>
+#endif
 
 #include "php_xdebug.h"
 
@@ -32,6 +34,10 @@
 #include "lib/cmd_parser.h"
 #include "lib/log.h"
 #include "lib/xml.h"
+
+#if WIN32
+#include <windows.h>
+#endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -121,13 +127,16 @@ static xdebug_str *make_message(xdebug_xml_node *message)
 	return ret;
 }
 
-
+#if __linux__
 static void handle_command(int fd, const char *line)
+#elif WIN32
+static void handle_command(HANDLE h, const char *line)
+#endif
 {
 	char *cmd = NULL;
 	xdebug_dbgp_arg *args;
 	int res = 0;
-	xdebug_ctrl_cmd *command;
+	xdebug_ctrl_cmd *command = NULL;
 	xdebug_str *message;
 	xdebug_xml_node *retval;
 	res = xdebug_cmd_parse(line, (char**) &cmd, (xdebug_dbgp_arg**) &args);
@@ -135,19 +144,37 @@ static void handle_command(int fd, const char *line)
 	retval = xdebug_xml_node_init("ctrl-response");
 	xdebug_xml_add_attribute(retval, "xmlns:xdebug-ctrl", "https://xdebug.org/ctrl/xdebug");
 
+	if (res != XDEBUG_ERROR_OK) {
+		xdebug_xml_node *error = xdebug_xml_node_init("error");
+		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_INVALID_ARGS), 0, 1);
+		ADD_REASON_MESSAGE(XDEBUG_ERROR_INVALID_ARGS);
+		xdebug_xml_add_child(retval, error);
+
+		goto send_result;
+	}
+
 	command = lookup_cmd(cmd);
-	if (command) {
-		command->handler(&retval, args);
-	} else {
-		xdebug_xml_node *error;
-		error = xdebug_xml_node_init("error");
+
+	if (!command) {
+		xdebug_xml_node *error = xdebug_xml_node_init("error");
 		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_COMMAND_UNAVAILABLE), 0, 1);
 		ADD_REASON_MESSAGE(XDEBUG_ERROR_COMMAND_UNAVAILABLE);
 		xdebug_xml_add_child(retval, error);
+
+		goto send_result;
 	}
 
+	command->handler(&retval, args);
+
+send_result:
 	message = make_message(retval);
+#if __linux__
 	write(fd, message->d, message->l);
+#elif WIN32
+	if (WriteFile(h, message->d, message->l, NULL, &XG_BASE(control_socket_ov))) {
+		SetEvent(XG_BASE(control_socket_ov).hEvent);
+	}
+#endif
 
 	xdfree(cmd);
 	xdebug_cmd_arg_dtor(args);
@@ -220,6 +247,8 @@ CTRL_FUNC(pause)
 		xdebug_xml_add_text(action, xdstrdup("IDE Connection Signalled"));
 
 		XG_DBG(context).do_connect_to_client = 1;
+
+        XG_BASE(statement_handler_enabled) = true;
 	} else {
 		action = xdebug_xml_node_init("action");
 		xdebug_xml_add_text(action, xdstrdup("Breakpoint Signalled"));
@@ -230,6 +259,7 @@ CTRL_FUNC(pause)
 	xdebug_xml_add_child(*retval, response);
 }
 
+#if __linux__
 static void xdebug_control_socket_handle(void)
 {
 	char           buffer[256];
@@ -253,7 +283,7 @@ static void xdebug_control_socket_handle(void)
 	rc = select(XG_BASE(control_socket_fd) + 1, &working_set, NULL, NULL, &timeout);
 
 	if (rc < 0) {
-		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SELECT", "Select failed: %s", strerror(errno));
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Select failed: %s", strerror(errno));
 		return;
 	}
 
@@ -271,20 +301,124 @@ static void xdebug_control_socket_handle(void)
 		}
 
 		memset(buffer, 0, sizeof(buffer));
-		bytes_read = read(new_sd, buffer, sizeof(buffer));
+		bytes_read = read(new_sd, buffer, sizeof(buffer) - 1);
 		if (bytes_read == -1) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't receive from socket: %s", strerror(errno));
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from socket: %s", strerror(errno));
 		} else {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-RECV", "Received: '%s'", buffer);
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-HANDLE", "Received: '%s'", buffer);
 			handle_command(new_sd, buffer);
 		}
 		close(new_sd);
 	}
 }
+#elif WIN32
+static bool named_pipe_listen()
+{
+	if (ConnectNamedPipe(XG_BASE(control_socket_h), &XG_BASE(control_socket_ov))) {
+		errno = GetLastError();
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't create control Named Pipe Connect 1 (0x%x)", errno);
+		return false;
+	}
+
+	switch (GetLastError()) {
+		case ERROR_IO_PENDING:
+			break;
+		case ERROR_PIPE_CONNECTED:
+			if (!SetEvent(XG_BASE(control_socket_ov).hEvent)) {
+				errno = GetLastError();
+				xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't create control Named Pipe Connect SetEvent (0x%x)", errno);
+				return false;
+			}
+		default:
+			errno = GetLastError();
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't create control Named Pipe Connect 2 (0x%x)", errno);
+			return false;
+	}
+
+	return true;
+}
+
+static void xdebug_control_socket_handle(void)
+{
+	DWORD result;
+	char  buffer[256];
+	int   bytes_read;
+
+	if (XG_BASE(control_socket_h) <= 0) {
+		/* No Named Pipe */
+		return;
+	}
+
+	if (WaitForSingleObject(XG_BASE(control_socket_ov).hEvent, 0) != WAIT_OBJECT_0) {
+		/* No connection yet */
+		return;
+	}
+
+	if (!GetOverlappedResult(XG_BASE(control_socket_h), &XG_BASE(control_socket_ov), &bytes_read, TRUE)) {
+		/* Error getting Overlapped result */
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from Named Pipe GetOverlappedResult 1 (0x%x)", GetLastError());
+		return;
+	}
+
+	memset(buffer, 0, sizeof(buffer));
+	bytes_read = 0;
+	if (!ReadFile(
+		XG_BASE(control_socket_h),
+		buffer,
+		sizeof(buffer) - 1,
+		&bytes_read,
+		&XG_BASE(control_socket_ov)
+	)) {
+		errno = GetLastError();
+		if (errno == ERROR_IO_PENDING) {
+			WaitForSingleObject(XG_BASE(control_socket_ov).hEvent, INFINITY);
+			/* Error? */
+			if (!GetOverlappedResult(XG_BASE(control_socket_h), &XG_BASE(control_socket_ov), &bytes_read, TRUE)) {
+				xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from Named Pipe GetOverlappedResult 2 (0x%x)", GetLastError());
+				goto finish;
+			}
+		} else {
+				xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from Named Pipe (0x%x)", GetLastError());
+				goto finish;
+		}
+	}
+
+	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-HANDLE", "Received: '%s'", buffer);
+	handle_command(XG_BASE(control_socket_h), buffer);
+	WaitForSingleObject(XG_BASE(control_socket_ov).hEvent, INFINITY);
+	GetOverlappedResult(XG_BASE(control_socket_h), &XG_BASE(control_socket_ov), &bytes_read, FALSE);
+
+	FlushFileBuffers(XG_BASE(control_socket_h));
+
+finish:
+	DisconnectNamedPipe(XG_BASE(control_socket_h));
+	if (!named_pipe_listen()) {
+		xdebug_control_socket_teardown();
+	}
+}
+#endif
+
+#if __linux__
+static bool is_control_socket_active(void)
+{
+	if (!XG_BASE(control_socket_path)) {
+		return false;
+	}
+	return true;
+}
+#elif WIN32
+static bool is_control_socket_active(void)
+{
+	if (XG_BASE(control_socket_h) <= 0) {
+		return false;
+	}
+	return true;
+}
+#endif
 
 void xdebug_control_socket_dispatch(void)
 {
-	if (!XG_BASE(control_socket_path)) {
+	if (!is_control_socket_active()) {
 		return;
 	}
 
@@ -304,9 +438,11 @@ void xdebug_control_socket_dispatch(void)
 	xdebug_control_socket_handle();
 }
 
+#ifdef __linux__
 void xdebug_control_socket_setup(void)
 {
 	struct sockaddr_un *servaddr = NULL;
+	socklen_t addr_len = 0;
 
 	/* Initialise control socket globals */
 	XG_BASE(control_socket_fd) = -1;
@@ -319,7 +455,7 @@ void xdebug_control_socket_setup(void)
 		return;
 	}
 
-	XG_BASE(control_socket_path) = xdebug_sprintf("xdebug-ctrl." ZEND_ULONG_FMT, xdebug_get_pid());
+	XG_BASE(control_socket_path) = xdebug_sprintf("xdebug-ctrl." ZEND_ULONG_FMT, getpid());
 
 	/* Part 2b — Configure socket */
 	servaddr = (struct sockaddr_un *)xdmalloc(sizeof(struct sockaddr_un));
@@ -332,13 +468,12 @@ void xdebug_control_socket_setup(void)
 		return;
 	}
 
-	memset(servaddr, 'x', sizeof(struct sockaddr_un));
 	servaddr->sun_family = AF_UNIX;
 	snprintf(servaddr->sun_path + 1, strlen(XG_BASE(control_socket_path)) + 1, "%s", XG_BASE(control_socket_path));
+	addr_len = offsetof(struct sockaddr_un, sun_path) + strlen(XG_BASE(control_socket_path)) + 1;
 	servaddr->sun_path[0] = '\0';
-	servaddr->sun_path[strlen(XG_BASE(control_socket_path)) + 1] = 'y';
 
-	if (0 != (bind(XG_BASE(control_socket_fd), (struct sockaddr *)servaddr, sizeof(struct sockaddr_un)))) {
+	if (0 != (bind(XG_BASE(control_socket_fd), (struct sockaddr *)servaddr, addr_len))) {
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-BIND", "Can't bind control socket");
 		xdfree(servaddr);
 		xdfree(XG_BASE(control_socket_path));
@@ -348,8 +483,7 @@ void xdebug_control_socket_setup(void)
 	}
 
 	/* Part 3 — Listen */
-	if (listen(XG_BASE(control_socket_fd), 32) < 0)
-	{
+	if (listen(XG_BASE(control_socket_fd), 32) < 0) {
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-LISTEN", "Listen failed: %s", strerror(errno));
 		xdfree(servaddr);
 		xdfree(XG_BASE(control_socket_path));
@@ -370,5 +504,74 @@ void xdebug_control_socket_teardown(void)
 		XG_BASE(control_socket_path) = NULL;
 	}
 }
+#elif WIN32
+void xdebug_control_socket_setup(void)
+{
+	char *name = NULL;
+
+	XG_BASE(control_socket_last_trigger) = xdebug_get_nanotime();
+
+	XG_BASE(control_socket_path) = xdebug_sprintf("xdebug-ctrl." ZEND_ULONG_FMT, xdebug_get_pid());
+	name = xdebug_sprintf("\\\\.\\pipe\\%s", XG_BASE(control_socket_path));
+
+	XG_BASE(control_socket_h) = CreateNamedPipeA(
+		name,
+		PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE | FILE_FLAG_OVERLAPPED,
+		PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_REJECT_REMOTE_CLIENTS,
+		1,
+		1024,
+		1024,
+		0,
+		NULL
+	);
+
+	if (XG_BASE(control_socket_h) == INVALID_HANDLE_VALUE) {
+		XG_BASE(control_socket_h) = 0;
+		errno = GetLastError();
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe (0x%x)", errno);
+		xdebug_control_socket_teardown();
+		xdfree(name);
+		return;
+	}
+
+	XG_BASE(control_socket_ov).Offset = 0;
+	XG_BASE(control_socket_ov).OffsetHigh = 0;
+	XG_BASE(control_socket_ov).hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+	if (XG_BASE(control_socket_ov).hEvent == NULL) {
+		errno = GetLastError();
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe Event (0x%x)", errno);
+		xdebug_control_socket_teardown();
+		xdfree(name);
+		return;
+	}
+
+	if (!named_pipe_listen()) {
+		xdebug_control_socket_teardown();
+		xdfree(name);
+		return;
+	}
+
+	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up successfully: '%s'", name);
+	xdfree(name);
+}
+
+void xdebug_control_socket_teardown(void)
+{
+	if (XG_BASE(control_socket_path)) {
+		xdfree(XG_BASE(control_socket_path));
+		XG_BASE(control_socket_path) = NULL;
+	}
+	if (XG_BASE(control_socket_h)) {
+		DisconnectNamedPipe(XG_BASE(control_socket_h));
+		CloseHandle(XG_BASE(control_socket_h));
+		XG_BASE(control_socket_h) = 0;
+	}
+	if (XG_BASE(control_socket_ov).hEvent) {
+		CloseHandle(XG_BASE(control_socket_ov).hEvent);
+		XG_BASE(control_socket_ov).hEvent = 0;
+	}
+}
+#endif
 
 #endif

@@ -23,7 +23,7 @@ xdebug_stop_trace();
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w               => $tf = '%s' %scapture-trace.inc:17
+%w               => $tf = '%s' %scapture-trace.inc:%d
 %w%f %w%d     -> hash_equals($known_string = '[Sensitive Parameter]', $user_string = '[Sensitive Parameter]') %sbug02104-002.php:4
 %w%f %w%d     -> hash_hmac($algo = 'sha256', $data = 'bar', $key = '[Sensitive Parameter]') %sbug02104-002.php:5
 %w%f %w%d     -> xdebug_stop_trace() %sbug02104-002.php:7

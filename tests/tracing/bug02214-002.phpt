@@ -18,13 +18,13 @@ xdebug_stop_trace();
 Version: %s
 File format: 4
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-2	1	1	%f	%d
-2	7	0	%f	%d	dirname	0		%sbug02214-002.php	4	1	'%sbug02214-002.php'
-2	7	1	%f	%d
-2	8	0	%f	%d	require	1	%sbug02214.inc	%sbug02214-002.php	4	0
-3	9	0	%f	%d	func	1		%sbug02214.inc	%d	1	['\n' => '\n', '\r' => '\r', '\r\n' => '\r\n']
-3	9	1	%f	%d
-2	8	1	%f	%d
-2	10	0	%f	%d	xdebug_stop_trace	0		%sbug02214-002.php	6	0
+2	%d	1	%f	%d
+2	%d	0	%f	%d	dirname	0		%sbug02214-002.php	4	1	'%sbug02214-002.php'
+2	%d	1	%f	%d
+2	%d	0	%f	%d	require	1	%sbug02214.inc	%sbug02214-002.php	4	0
+3	%d	0	%f	%d	func	1		%sbug02214.inc	%d	1	['\n' => '\n', '\r' => '\r', '\r\n' => '\r\n']
+3	%d	1	%f	%d
+2	%d	1	%f	%d
+2	%d	0	%f	%d	xdebug_stop_trace	0		%sbug02214-002.php	6	0
 			%f	%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

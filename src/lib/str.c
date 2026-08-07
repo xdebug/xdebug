@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,16 +19,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+#include <assert.h>
 
-#if PHP_VERSION_ID < 80200
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
-#  include "zend_smart_str.h"
-# pragma GCC diagnostic pop
+#ifndef XDEBUG_NO_PHP_FEATURES
+# if !defined(_MSC_VER)
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+# endif
+# include "zend_smart_str.h"
+# if !defined(_MSC_VER)
+#   pragma GCC diagnostic pop
+# endif
+# include "lib/php-header.h"
+# include "ext/standard/php_string.h"
 #endif
-
-#include "lib/php-header.h"
-#include "ext/standard/php_string.h"
 
 #include "mm.h"
 #include "str.h"
@@ -72,10 +76,12 @@ void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str)
     xdebug_str_internal_addl(xs, str->d, str->l, 0);
 }
 
+#ifndef XDEBUG_NO_PHP_FEATURES
 void xdebug_str_add_zstr(xdebug_str *xs, const zend_string *str)
 {
     xdebug_str_internal_addl(xs, ZSTR_VAL(str), ZSTR_LEN(str), 0);
 }
+#endif
 
 void xdebug_str_addc(xdebug_str *xs, char letter)
 {
@@ -157,7 +163,6 @@ void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 }
 #endif
 
-
 void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 {
 	va_list args;
@@ -165,6 +170,18 @@ void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 	va_start(args, fmt);
 	xdebug_str_add_va_fmt(xs, fmt, args);
 	va_end(args);
+}
+
+char *xdebug_sprintf(const char* fmt, ...)
+{
+	va_list args;
+	xdebug_str tmp_str = {0};
+
+	va_start(args, fmt);
+	xdebug_str_add_va_fmt(&tmp_str, fmt, args);
+	va_end(args);
+
+	return tmp_str.d;
 }
 
 void xdebug_str_chop(xdebug_str *xs, size_t c)
@@ -184,6 +201,8 @@ xdebug_str *xdebug_str_new(void)
 	tmp->l = 0;
 	tmp->a = 0;
 	tmp->d = NULL;
+	tmp->rc = 1;
+	tmp->is_static = false;
 
 	return tmp;
 }
@@ -206,9 +225,11 @@ xdebug_str *xdebug_str_create_from_char(char *c)
 	return xdebug_str_create(c, strlen(c));
 }
 
-xdebug_str *xdebug_str_copy(xdebug_str *orig)
+xdebug_str *xdebug_str_clone(xdebug_str *orig)
 {
-	xdebug_str *tmp = xdebug_str_new();
+	xdebug_str *tmp;
+
+	tmp = xdebug_str_new();
 
 	tmp->l = tmp->a = orig->l;
 	tmp->a++;
@@ -219,47 +240,49 @@ xdebug_str *xdebug_str_copy(xdebug_str *orig)
 	return tmp;
 }
 
-void xdebug_str_destroy(xdebug_str *s)
+xdebug_str *xdebug_str_copy(xdebug_str *orig)
+{
+	orig->rc++;
+
+	return orig;
+}
+
+static void xdebug_str_free_storage(xdebug_str *s)
 {
 	if (s->d) {
 		xdfree(s->d);
 	}
 }
 
+void xdebug_str_destroy(xdebug_str *s)
+{
+	assert(s->is_static);
+	xdebug_str_free_storage(s);
+}
+
 void xdebug_str_free(xdebug_str *s)
 {
-	xdebug_str_destroy(s);
+	assert(!s->is_static);
+
+	s->rc--;
+
+	if (s->rc > 0) {
+		return;
+	}
+
+	xdebug_str_free_storage(s);
 	xdfree(s);
 }
 
-char *xdebug_sprintf(const char* fmt, ...)
+bool xdebug_str_is_equal(xdebug_str *s1, xdebug_str *s2)
 {
-	va_list args;
-	xdebug_str tmp_str = {0};
-
-	va_start(args, fmt);
-	xdebug_str_add_va_fmt(&tmp_str, fmt, args);
-	va_end(args);
-
-	return tmp_str.d;
-}
-
-/**
- * Duplicate zend_strndup in core to avoid mismatches
- * in C-runtime libraries when xdebug and core are built
- * with different run-time libraries.
- */
-char *xdebug_strndup(const char *s, int length)
-{
-	char *p;
-
-	p = (char *) xdmalloc(length + 1);
-	if (p == NULL) {
-		return p;
+	if (s1->l != s2->l) {
+		return false;
 	}
-	if (length) {
-		memcpy(p, s, length);
+
+	if (memcmp(s1->d, s2->d, s1->l) != 0) {
+		return false;
 	}
-	p[length] = 0;
-	return p;
+
+	return true;
 }

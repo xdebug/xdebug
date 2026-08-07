@@ -10,7 +10,7 @@ date.timezone=Europe/Oslo
 --FILE--
 <?php
 require_once 'capture-trace.inc';
-@printf('%d %d %d %d:%d:%d', 1061728888, 1061728888, 1061728888, 1061728888, 1061728888, 1061728888);
+@printf('%d %d %d %d:%d:%x', 1061728888, 1061728888, 1061728888, 1061728888, 1061728888, 1061728888);
 xdebug_stop_trace();
 ?>
 --EXPECTF--

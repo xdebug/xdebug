@@ -11,7 +11,7 @@ XDEBUG_TRIGGER=value3
 <?php
 require 'dbgp/dbgpclient.php';
 
-$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_with_request_trigger_match-009.txt';
+$xdebugLogFileName = getTmpFile('start_with_request_trigger_match-009.txt');
 @unlink( $xdebugLogFileName );
 
 dbgpRunFile(
@@ -21,7 +21,7 @@ dbgpRunFile(
 		'xdebug.mode' => 'debug', 'xdebug.start_with_request' => 'trigger',
 		'xdebug.trigger_value' => 'value1,value2', 'variables_order' => 'PGCS',
 		'xdebug.log' => $xdebugLogFileName, 'xdebug.log_level' => 10,
-		'xdebug.control_socket' => 'off',
+		'xdebug.control_socket' => 'off', 'xdebug.path_mapping' => 'off',
 	],
 	['timeout' => 1]
 );

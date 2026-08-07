@@ -49,11 +49,11 @@ const char *xdebug_log_prefix[11] = {
 const char *xdebug_log_prefix_emoji[11] = {
 	"☠", "🛑 ", "", "⚠️ ", "", "", "", "🛈 ", "", "", "• "
 };
-const char *xdebug_channel_msg_prefix[8] = {
-	"CFG-", "LOG-", "DBG-", "GC-", "PROF-", "TRACE-", "COV-", "BASE-"
+const char *xdebug_channel_msg_prefix[9] = {
+	"CFG-", "LOG-", "DBG-", "GC-", "PROF-", "TRACE-", "COV-", "BASE-" , "PATHMAP-"
 };
-const char *xdebug_channel_name[8] = {
-	"[Config] ", "[Log Files] ", "[Step Debug] ", "[GC Stats] ", "[Profiler] ", "[Tracing] ", "[Coverage] ", "[Base] "
+const char *xdebug_channel_name[9] = {
+	"[Config] ", "[Log Files] ", "[Step Debug] ", "[GC Stats] ", "[Profiler] ", "[Tracing] ", "[Coverage] ", "[Base] ", "[Path Mapping] "
 };
 
 static inline int xdebug_internal_log(int channel, int log_level, const char *message)
@@ -735,8 +735,16 @@ static void print_step_debug_information(void)
 				XG_DBG(context).resolved_breakpoints ? "Yes" : "No"
 			);
 			xdebug_info_printf(
-				"<tr><td class=\"e\">Breakpoint Details</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				"<tr><td class=\"e\">Breakpoint: Details</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
 				XG_DBG(context).breakpoint_details ? "Yes" : "No"
+			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Breakpoint: Include Return Values</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				XG_DBG(context).breakpoint_include_return_value ? "Yes" : "No"
+			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Virtual __EXCEPTION Value</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				XG_DBG(context).virtual_exception_value ? "Yes" : "No"
 			);
 		}
 	} else {
@@ -774,6 +782,7 @@ static void print_step_debug_information(void)
 			xdebug_info_printf("Resolved Breakpoints => %s\n", XG_DBG(context).resolved_breakpoints ? "Yes" : "No");
 			xdebug_info_printf("Breakpoint: Details => %s\n", XG_DBG(context).breakpoint_details ? "Yes" : "No");
 			xdebug_info_printf("Breakpoint: Include Return Values => %s\n", XG_DBG(context).breakpoint_include_return_value ? "Yes" : "No");
+			xdebug_info_printf("Virtual __EXCEPTION Value => %s\n", XG_DBG(context).virtual_exception_value ? "Yes" : "No");
 		}
 	}
 	php_info_print_table_end();

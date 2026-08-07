@@ -11,8 +11,10 @@ xdebug.trace_format=0
 xdebug.use_compression=0
 --FILE--
 <?php
-$id = getenv( 'UNIQ_RUN_ID' ) ? getenv( 'UNIQ_RUN_ID' ) : '';
-xdebug_start_trace( sys_get_temp_dir() . '/1739' . $id );
+require_once __DIR__ . '/../utils.inc';
+
+xdebug_start_trace(getTmpFile( '1739'));
+
 function foo() {
 	echo "bar\n";
 }
@@ -21,9 +23,10 @@ foo();
 ?>
 --AFTER--
 <?php
-$id = getenv( 'UNIQ_RUN_ID' ) ? getenv( 'UNIQ_RUN_ID' ) : '';
-echo file_get_contents( sys_get_temp_dir() . '/1739' . $id . '.xt' );
-unlink( sys_get_temp_dir() . '/1739' . $id . '.xt' );
+require_once __DIR__ . '/../utils.inc';
+
+echo file_get_contents(getTmpFile('1739' ) . '.xt');
+unlink(getTmpFile('1739' ) . '.xt');
 ?>
 --EXPECTF--
 bar
