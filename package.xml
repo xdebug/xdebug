@@ -199,6 +199,8 @@ Thu, Dec 04, 2025 - Xdebug 3.5.0
      <file name="debugger.c" role="src" />
      <file name="debugger.h" role="src" />
      <file name="debugger_private.h" role="src" />
+     <file name="frankenphp.c" role="src" />
+     <file name="frankenphp.h" role="src" />
      <file name="handlers.c" role="src" />
      <file name="handlers.h" role="src" />
      <file name="handler_dbgp.c" role="src" />

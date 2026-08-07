@@ -112,7 +112,7 @@ if test "$PHP_XDEBUG" != "no"; then
   XDEBUG_LIB_MAPS_SOURCES="src/lib/maps/maps.c src/lib/maps/maps_private.c src/lib/maps/parser.c"
 
   XDEBUG_COVERAGE_SOURCES="src/coverage/branch_info.c src/coverage/code_coverage.c"
-  XDEBUG_DEBUGGER_SOURCES="src/debugger/com.c src/debugger/debugger.c src/debugger/handler_dbgp.c src/debugger/handlers.c src/debugger/ip_info.c"
+  XDEBUG_DEBUGGER_SOURCES="src/debugger/com.c src/debugger/debugger.c src/debugger/frankenphp.c src/debugger/handler_dbgp.c src/debugger/handlers.c src/debugger/ip_info.c"
   XDEBUG_DEVELOP_SOURCES="src/develop/develop.c src/develop/monitor.c src/develop/php_functions.c src/develop/stack.c src/develop/superglobals.c"
   XDEBUG_GCSTATS_SOURCES="src/gcstats/gc_stats.c"
   XDEBUG_PROFILER_SOURCES="src/profiler/profiler.c"

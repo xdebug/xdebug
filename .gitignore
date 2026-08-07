@@ -89,10 +89,11 @@ phpt.*
 !bench.php
 !rector.php
 !generate_summary.php
+!tests/frankenphp/**/*.php
+!tests/frankenphp/**/*.sh
 tests/ctest/*.o
 tests/ctest/afl-test-*
 tests/ctest/ctest
 tests/ctest/ftest
 tests/ctest/fuzz-output
 tests/ctest/xdebuglib.a
-
