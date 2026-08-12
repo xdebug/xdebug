@@ -33,6 +33,7 @@
 #  include <netinet/in.h>
 # endif
 # include <netdb.h>
+# include <arpa/inet.h>
 #else
 # include <process.h>
 # include <direct.h>
@@ -137,6 +138,59 @@ void set_keepalive_options(int fd)
 # endif
 }
 #endif  // !WIN32 && !WINNT
+
+bool socket_is_localhost(struct addrinfo *addr)
+{
+	switch (addr->ai_family) {
+		char ip_name_buffer[256];
+
+		case AF_INET: {
+			struct sockaddr_in *addr_in = (struct sockaddr_in*) addr->ai_addr;
+			inet_ntop(addr->ai_family, &addr_in->sin_addr, ip_name_buffer, sizeof(ip_name_buffer) - 1);
+
+			return strcmp(ip_name_buffer, "127.0.0.1") == 0;
+		}
+
+		case AF_INET6: {
+			struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6*) addr->ai_addr;
+			inet_ntop(addr->ai_family, &addr_in6->sin6_addr, ip_name_buffer, sizeof(ip_name_buffer) - 1);
+
+			return strcmp(ip_name_buffer, "::1") == 0;
+		}
+
+		default:
+			return false;
+	}
+
+	return false;
+}
+
+#if WIN32 || WINNT
+# ifndef TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS
+#  define TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS 0xFE /* -2 */
+# endif
+#endif  // WIN32 || WINNT
+
+void disable_tcp_syn_transmissions_for_localhost(struct addrinfo *addr, int sockfd)
+{
+	bool is_localhost = socket_is_localhost(addr);
+
+	xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_INFO, "LOCALHOST", "Connecting to localhost: %s", is_localhost ? "yes" : "no");
+	if (!is_localhost) {
+		return;
+	}
+
+#if WIN32 || WINNT
+	{
+		TCP_INITIAL_RTO_PARAMETERS rto;
+		DWORD bytes = 0;
+		memset(&rto, 0, sizeof(rto));
+		rto.Rtt = TCP_INITIAL_RTO_DEFAULT_RTT;
+		rto.MaxSynRetransmissions = TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS;
+		(void)WSAIoctl(sockfd, SIO_TCP_INITIAL_RTO, &rto, sizeof(rto), NULL, 0, &bytes, NULL, NULL);
+	}
+#endif  // WIN32 || WINNT
+}
 
 static char* resolve_pseudo_hosts(const char *requested_hostname)
 {
@@ -273,6 +327,8 @@ static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 			xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "SOCK2", "Creating socket for '%s:%d', fcntl(FD_CLOEXEC): %s.", hostname, dport, strerror(errno));
 		}
 #endif
+
+		disable_tcp_syn_transmissions_for_localhost(ptr, sockfd);
 
 		/* Try to connect to the newly created socket */
 		/* Worth noting is that the port is set in the getaddrinfo call before */

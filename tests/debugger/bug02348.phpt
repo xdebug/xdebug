@@ -47,6 +47,7 @@ echo file_get_contents( $xdebugLogFileName );
 
 [%d] Log opened at %s
 [%d] [Step Debug] INFO: Connecting to configured address/port: 127.0.0.1:%d.
+[%d] [Step Debug] INFO: Connecting to localhost: yes
 [%d] [Step Debug] INFO: Connected to debugging client: 127.0.0.1:%d (through xdebug.client_host/xdebug.client_port).
 [%d] [Step Debug] -> <init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="%sbug02348.inc" language="PHP" xdebug:language_version="%s" protocol_version="1.0" appid="%d"><engine version="%s"><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[%s]]></copyright></init>
 
