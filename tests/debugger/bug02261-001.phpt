@@ -33,6 +33,7 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] Log opened at %s
 [%d] [Config] INFO: Control socket set up successfully: '@xdebug-ctrl.%s'
 [%d] [Step Debug] INFO: Connecting to configured address/port: %s
+[%d] [Step Debug] INFO: Connecting to localhost: yes
 [%d] [Step Debug] INFO: Connected to debugging client: %s
 [%d] [Step Debug] -> <init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" %s></init>
 
