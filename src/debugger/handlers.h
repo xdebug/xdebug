@@ -85,6 +85,7 @@ struct _xdebug_con {
 	int                    next_level;
 	int                    do_finish;
 	int                    do_connect_to_client;
+	int                    do_request_reinit; /* set by the FrankenPHP worker mode hooks (frankenphp.c) */
 	int                    finish_level;
 	int                    finish_func_nr;
 

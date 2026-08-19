@@ -39,6 +39,7 @@
 #if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 # include "ctrl_socket.h"
 #endif
+#include "debugger/frankenphp.h"
 #include "develop/develop.h"
 #include "develop/stack.h"
 #include "gcstats/gc_stats.h"
@@ -752,6 +753,18 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 			xdebug_tracing_init_if_requested(op_array);
 		}
+	}
+
+	/* FrankenPHP worker mode: on the first call executed for a new worker
+	 * request, re-run the request activation checks (see debugger/frankenphp.c).
+	 * The pending check is a single flag read: the flag can only be armed by
+	 * the FrankenPHP SAPI hooks, and RINIT disarms it, so only requests
+	 * inside a worker loop ever take the branch. This cannot live in the
+	 * 'stack == 0' block above, because inside the worker loop the stack is
+	 * never empty again; it has to come after it though, so that the program
+	 * name is set before a debug session can be initiated. */
+	if (xdebug_frankenphp_reinit_pending()) {
+		xdebug_frankenphp_request_reinit();
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XDEBUG_VECTOR_COUNT(XG_BASE(stack)) >= XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {

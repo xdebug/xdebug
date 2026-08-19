@@ -15,6 +15,7 @@ m4_include([m4/clocks.m4])
 if test "$PHP_XDEBUG" != "no"; then
   AC_MSG_CHECKING([for supported PHP version])
   PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
+  PHP_XDEBUG_MAJOR_VERSION=`${PHP_CONFIG} --version | sed 's/^\([[0-9]]\.[[0-9]]\).*/\1/'`
   PHP_XDEBUG_FOUND_VERNUM=`${PHP_CONFIG} --vernum`
   if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "80000"; then
     AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.7.0 (found $PHP_XDEBUG_FOUND_VERSION)])
@@ -23,6 +24,7 @@ if test "$PHP_XDEBUG" != "no"; then
       AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.7.0 (found $PHP_XDEBUG_FOUND_VERSION)])
     else
       AC_MSG_RESULT([supported ($PHP_XDEBUG_FOUND_VERSION)])
+      PHP_SUBST(PHP_XDEBUG_MAJOR_VERSION)
     fi
   fi
   
@@ -112,7 +114,7 @@ if test "$PHP_XDEBUG" != "no"; then
   XDEBUG_LIB_MAPS_SOURCES="src/lib/maps/maps.c src/lib/maps/maps_private.c src/lib/maps/parser.c"
 
   XDEBUG_COVERAGE_SOURCES="src/coverage/branch_info.c src/coverage/code_coverage.c"
-  XDEBUG_DEBUGGER_SOURCES="src/debugger/com.c src/debugger/debugger.c src/debugger/handler_dbgp.c src/debugger/handlers.c src/debugger/ip_info.c"
+  XDEBUG_DEBUGGER_SOURCES="src/debugger/com.c src/debugger/debugger.c src/debugger/frankenphp.c src/debugger/handler_dbgp.c src/debugger/handlers.c src/debugger/ip_info.c"
   XDEBUG_DEVELOP_SOURCES="src/develop/develop.c src/develop/monitor.c src/develop/php_functions.c src/develop/stack.c src/develop/superglobals.c"
   XDEBUG_GCSTATS_SOURCES="src/gcstats/gc_stats.c"
   XDEBUG_PROFILER_SOURCES="src/profiler/profiler.c"
