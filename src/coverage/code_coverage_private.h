@@ -28,7 +28,7 @@
 
 typedef struct xdebug_coverage_line {
 	int lineno;
-	int count;
+	zend_long count;
 	int executable;
 } xdebug_coverage_line;
 
