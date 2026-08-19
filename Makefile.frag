@@ -49,3 +49,6 @@ test-coverage-lcov: test-coverage
 
 test-coverage-html: test-coverage-lcov
 	genhtml $(top_srcdir)/.coverage.lcov --output-directory=/tmp/html
+
+test-frankenphp:
+	PHP_VERSION="$(PHP_XDEBUG_MAJOR_VERSION)" tests/frankenphp/run-tests.sh
