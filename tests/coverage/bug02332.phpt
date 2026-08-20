@@ -1,10 +1,5 @@
 --TEST--
 Test for bug #2332: Crash with coverage and nested fibers
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1');
-?>
 --INI--
 xdebug.mode=coverage
 --FILE--

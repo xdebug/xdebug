@@ -4,11 +4,6 @@ Tracing: Flamegraph with Fiber
 xdebug.mode=trace
 xdebug.start_with_request=no
 xdebug.trace_format=3
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1');
-?>
 --FILE--
 <?php
 require_once 'capture-trace.inc';

@@ -3,7 +3,7 @@ Test for bug #1998: Double facet attribute generated for enums that are stored i
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp; PHP >= 8.1');
+check_reqs('dbgp');
 ?>
 --FILE--
 <?php

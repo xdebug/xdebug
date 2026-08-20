@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #2352: Crash with storing exception traces and __invoke (= PHP 8.1)
+Test for bug #2352: Crash with storing exception traces and __invoke (PHP = 8.1)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1, < 8.2');
+check_reqs('PHP < 8.2');
 ?>
 --INI--
 xdebug.mode=develop

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2025 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,10 +17,8 @@
 #include "php_xdebug.h"
 #include "zend_extensions.h"
 
-#if PHP_VERSION_ID >= 80100
-# include "Zend/zend_fibers.h"
-# include "Zend/zend_observer.h"
-#endif
+#include "Zend/zend_fibers.h"
+#include "Zend/zend_observer.h"
 
 #include "branch_info.h"
 #include "code_coverage_private.h"
@@ -671,7 +669,6 @@ static void prefill_from_oparray(zend_op_array *op_array)
 		xdebug_branch_info_add_branches_and_paths(cov_file, (char*) function_name, branch_info);
 	}
 
-#if PHP_VERSION_ID >= 80100
 	if (!op_array->num_dynamic_func_defs) {
 		return;
 	}
@@ -679,7 +676,6 @@ static void prefill_from_oparray(zend_op_array *op_array)
 	for (i = 0; i < op_array->num_dynamic_func_defs; i++) {
 		prefill_from_oparray(op_array->dynamic_func_defs[i]);
 	}
-#endif
 }
 
 static int prefill_from_function_table(zend_op_array *opa)
@@ -789,7 +785,6 @@ static void scrub_runtime(void *dummy, xdebug_hash_element *e)
 	xdebug_hash_empty(file->runtime.functions);
 }
 
-#if PHP_VERSION_ID >= 80100
 /** Handling fibers ********************************************************/
 struct xdebug_fiber_entry {
 	xdebug_path_info *path_info;
@@ -861,7 +856,6 @@ static void xdebug_fiber_switch_coverage_observer(zend_fiber_context *from, zend
 	zend_string_release(to_key);
 
 }
-#endif
 
 
 PHP_FUNCTION(xdebug_start_code_coverage)
@@ -885,14 +879,12 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	RETURN_TRUE;
 }
 
-#if PHP_VERSION_ID >= 80100
 static void recreate_path_stacks(void *dummy, xdebug_hash_element *e)
 {
 	struct xdebug_fiber_entry *tmp = (struct xdebug_fiber_entry*) e->ptr;
 
 	xdebug_path_info_flush(tmp->path_info);
 }
-#endif
 
 PHP_FUNCTION(xdebug_stop_code_coverage)
 {
@@ -925,12 +917,7 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 
 		xdebug_hash_empty(XG_COV(visited_branches));
 
-#if PHP_VERSION_ID >= 80100
 		xdebug_hash_apply(XG_COV(fiber_path_info_stacks), NULL, recreate_path_stacks);
-#else
-		xdebug_path_info_dtor(XG_COV(paths_stack));
-		XG_COV(paths_stack) = xdebug_path_info_ctor();
-#endif
 	}
 
 	XG_COV(code_coverage_active) = 0;
@@ -1400,9 +1387,7 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		}
 	}
 
-#if PHP_VERSION_ID >= 80100
 	zend_observer_fiber_switch_register(xdebug_fiber_switch_coverage_observer);
-#endif
 }
 
 void xdebug_coverage_register_constants(INIT_FUNC_ARGS)
@@ -1414,6 +1399,8 @@ void xdebug_coverage_register_constants(INIT_FUNC_ARGS)
 
 void xdebug_coverage_rinit(void)
 {
+	zend_string *fiber_key;
+
 	xdebug_disable_opcache_optimizer();
 
 	XG_COV(code_coverage_active) = 0;
@@ -1430,18 +1417,11 @@ void xdebug_coverage_rinit(void)
 	/* Initialize visited classes and branches hash */
 	XG_COV(visited_branches) = xdebug_hash_alloc(2048, NULL);
 
-#if PHP_VERSION_ID >= 80100
-	{
-		zend_string *fiber_key = create_key_for_fiber(EG(main_fiber_context));
+	fiber_key = create_key_for_fiber(EG(main_fiber_context));
+	XG_COV(fiber_path_info_stacks) = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_fiber_entry_dtor);
+	XG_COV(paths_stack) = create_path_info_for_fiber(fiber_key, EG(main_fiber_context));
+	zend_string_release(fiber_key);
 
-		XG_COV(fiber_path_info_stacks) = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_fiber_entry_dtor);
-		XG_COV(paths_stack) = create_path_info_for_fiber(fiber_key, EG(main_fiber_context));
-
-		zend_string_release(fiber_key);
-	}
-#else
-	XG_COV(paths_stack) = xdebug_path_info_ctor();
-#endif
 	XG_COV(branches).size = 0;
 	XG_COV(branches).last_branch_nr = NULL;
 }
@@ -1457,15 +1437,9 @@ void xdebug_coverage_post_deactivate(void)
 	XG_COV(visited_branches) = NULL;
 
 	/* Clean up path coverage array */
-#if PHP_VERSION_ID >= 80100
 	xdebug_hash_destroy(XG_COV(fiber_path_info_stacks));
 	XG_COV(fiber_path_info_stacks) = NULL;
-#else
-	if (XG_COV(paths_stack)) {
-		xdebug_path_info_dtor(XG_COV(paths_stack));
-		XG_COV(paths_stack) = NULL;
-	}
-#endif
+
 	if (XG_COV(branches).last_branch_nr) {
 		free(XG_COV(branches).last_branch_nr);
 		XG_COV(branches).last_branch_nr = NULL;

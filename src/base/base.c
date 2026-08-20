@@ -25,11 +25,9 @@
 
 #include "zend_interfaces.h"
 
-#if PHP_VERSION_ID >= 80100
-# include "base_private.h"
-# include "Zend/zend_fibers.h"
-# include "Zend/zend_observer.h"
-#endif
+#include "base_private.h"
+#include "Zend/zend_fibers.h"
+#include "Zend/zend_observer.h"
 
 #include "php_xdebug.h"
 #include "php_xdebug_arginfo.h"
@@ -59,15 +57,9 @@ zif_handler orig_pcntl_exec_func = NULL;
 zif_handler orig_pcntl_fork_func = NULL;
 zif_handler orig_exit_func = NULL;
 
-#if PHP_VERSION_ID >= 80100
 void (*xdebug_old_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*xdebug_new_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 static void xdebug_error_cb(int orig_type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
-#else
-void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
-void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
-static void xdebug_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
-#endif
 
 /* execution redirection functions */
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type);
@@ -874,27 +866,10 @@ static bool should_run_user_handler(zend_execute_data *execute_data)
 	return true;
 }
 
-/* This is confusing. On PHP 8.1 we flip the logic, as normal user functions
- * are handled through the Observer API. Once PHP 8.0 support is dropped, the
- * negation should be **added** to the usage below in xdebug_execute_ex. */
-static bool should_run_user_handler_wrapper(zend_execute_data *execute_data)
-{
-	/* If the stack vector hasn't been initialised yet, we should abort immediately */
-	if (!XG_BASE(stack)) {
-		return false;
-	}
-
-#if PHP_VERSION_ID >= 80100
-	return !should_run_user_handler(execute_data);
-#else
-	return should_run_user_handler(execute_data);
-#endif
-}
-
 /* We still need this to do "include", "require", and "eval" */
 static void xdebug_execute_ex(zend_execute_data *execute_data)
 {
-	bool run_user_handler = should_run_user_handler_wrapper(execute_data);
+	bool run_user_handler = !should_run_user_handler(execute_data);
 
 	if (run_user_handler) {
 		xdebug_execute_user_code_begin(execute_data);
@@ -1043,7 +1018,6 @@ static void xdebug_execute_internal(zend_execute_data *execute_data, zval *retur
 }
 #endif
 
-#if PHP_VERSION_ID >= 80100
 static void xdebug_execute_begin(zend_execute_data *execute_data)
 {
 	/* If the stack vector hasn't been initialised yet, we should abort immediately */
@@ -1082,7 +1056,6 @@ static zend_observer_fcall_handlers xdebug_observer_init(zend_execute_data *exec
 {
 	return (zend_observer_fcall_handlers){xdebug_execute_begin, xdebug_execute_end};
 }
-#endif
 /***************************************************************************/
 
 static void xdebug_base_overloaded_functions_setup(void)
@@ -1137,7 +1110,6 @@ static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **b
 	return FAILURE;
 }
 
-#if PHP_VERSION_ID >= 80100
 /** Handling fibers ********************************************************/
 static struct xdebug_fiber_entry* xdebug_fiber_entry_ctor(xdebug_vector *stack)
 {
@@ -1233,7 +1205,6 @@ static void xdebug_fiber_switch_observer(zend_fiber_context *from, zend_fiber_co
 	zend_string_release(to_key);
 }
 /***************************************************************************/
-#endif
 
 #ifdef __linux__
 int read_systemd_private_tmp_directory(char **private_tmp)
@@ -1310,10 +1281,8 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	xdebug_old_error_cb = zend_error_cb;
 	xdebug_new_error_cb = xdebug_error_cb;
 
-#if PHP_VERSION_ID >= 80100
 	/* User Code Functions */
 	zend_observer_fcall_register(xdebug_observer_init);
-#endif
 
 	/* Include, Require, Eval */
 	xdebug_old_execute_ex = zend_execute_ex;
@@ -1329,9 +1298,7 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	XG_BASE(error_reporting_overridden) = 0;
 	XG_BASE(output_is_tty) = OUTPUT_NOT_CHECKED;
 
-#if PHP_VERSION_ID >= 80100
 	zend_observer_fiber_switch_register(xdebug_fiber_switch_observer);
-#endif
 
 	XG_BASE(private_tmp) = NULL;
 #ifdef __linux__
@@ -1374,6 +1341,8 @@ void xdebug_base_post_startup()
 
 void xdebug_base_rinit()
 {
+	zend_string *fiber_key;
+
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
 	if (
@@ -1385,18 +1354,11 @@ void xdebug_base_rinit()
 		xdebug_base_use_xdebug_throw_exception_hook();
 	}
 
-#if PHP_VERSION_ID >= 80100
-	{
-		zend_string *fiber_key = create_key_for_fiber(EG(main_fiber_context));
+	fiber_key = create_key_for_fiber(EG(main_fiber_context));
+	XG_BASE(fiber_stacks) = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_fiber_entry_dtor);
+	XG_BASE(stack) = create_stack_for_fiber(fiber_key, EG(main_fiber_context));
+	zend_string_release(fiber_key);
 
-		XG_BASE(fiber_stacks) = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_fiber_entry_dtor);
-		XG_BASE(stack) = create_stack_for_fiber(fiber_key, EG(main_fiber_context));
-
-		zend_string_release(fiber_key);
-	}
-#else
-	XG_BASE(stack) = xdebug_vector_alloc(sizeof(function_stack_entry), function_stack_entry_dtor);
-#endif
 	XG_BASE(in_debug_info) = 0;
 	XG_BASE(prev_memory)   = 0;
 	XG_BASE(function_count) = -1;
@@ -1458,12 +1420,9 @@ void xdebug_base_rinit()
 
 void xdebug_base_post_deactivate()
 {
-#if PHP_VERSION_ID >= 80100
 	xdebug_hash_destroy(XG_BASE(fiber_stacks));
 	XG_BASE(fiber_stacks) = NULL;
-#else
-	xdebug_vector_destroy(XG_BASE(stack));
-#endif
+
 	XG_BASE(stack) = NULL;
 
 	XG_BASE(in_debug_info)    = 0;
@@ -1497,7 +1456,6 @@ void xdebug_base_rshutdown()
 }
 
 /* Error callback for formatting stack traces */
-#if PHP_VERSION_ID >= 80100
 static void xdebug_error_cb(int orig_type, zend_string *error_filename, const unsigned int error_lineno, zend_string *message)
 {
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
@@ -1514,26 +1472,6 @@ static void xdebug_error_cb(int orig_type, zend_string *error_filename, const un
 		xdebug_old_error_cb(orig_type, error_filename, error_lineno, message);
 	}
 }
-#else
-static void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, zend_string *message)
-{
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
-		int type                        = orig_type & E_ALL;
-		char *error_type_str            = xdebug_error_type(type);
-		zend_string *tmp_error_filename = zend_string_init(error_filename, strlen(error_filename), 0);
-
-		xdebug_debugger_error_cb(tmp_error_filename, error_lineno, type, error_type_str, ZSTR_VAL(message));
-
-		zend_string_release(tmp_error_filename);
-		xdfree(error_type_str);
-	}
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
-		xdebug_develop_error_cb(orig_type, error_filename, error_lineno, message);
-	} else {
-		xdebug_old_error_cb(orig_type, error_filename, error_lineno, message);
-	}
-}
-#endif
 
 void xdebug_base_use_original_error_cb(void)
 {
@@ -1564,11 +1502,9 @@ static void xdebug_throw_exception_hook(zend_object *exception)
 		return;
 	}
 
-#if PHP_VERSION_ID >= 80100
 	if (zend_is_graceful_exit(exception)) {
 		return;
 	}
-#endif
 
 	exception_ce = exception->ce;
 

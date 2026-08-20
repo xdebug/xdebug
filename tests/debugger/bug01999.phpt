@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1999: Show readonly properties (PHP >= 8.1)
+Test for bug #1999: Show readonly properties
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1; dbgp');
+check_reqs('dbgp');
 ?>
 --FILE--
 <?php
