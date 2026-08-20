@@ -712,6 +712,10 @@ static void mark_fse_as_having_line_breakpoints(function_stack_entry *fse)
 		return;
 	}
 
+	if (fse->user_defined != XDEBUG_USER_DEFINED) {
+		return;
+	}
+
 	/* loop over all line breakpoints until one hits, and if so, turn on 'has_line_breakpoints' */
 	for (le = XDEBUG_LLIST_HEAD(XG_DBG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 		xdebug_brk_info *extra_brk_info = XDEBUG_LLIST_VALP(le);
@@ -978,7 +982,7 @@ xdebug_set *xdebug_debugger_get_breakable_lines_from_oparray(zend_op_array *opa)
 	int         i;
 	xdebug_set *tmp;
 
-	tmp = xdebug_set_create(opa->line_end);
+	tmp = xdebug_set_create(opa->line_end + 1);
 
 	for (i = 0; i < opa->last; i++ ) {
 		if (opa->opcodes[i].opcode == ZEND_EXT_STMT ) {
