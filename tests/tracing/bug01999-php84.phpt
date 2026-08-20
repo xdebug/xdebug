@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1999: Show readonly properties (PHP >= 8.1, < 8.5)
+Test for bug #1999: Show readonly properties (PHP < 8.5)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1, < 8.5');
+check_reqs('PHP < 8.5');
 ?>
 --INI--
 xdebug.mode=trace

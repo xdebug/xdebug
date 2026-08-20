@@ -3,7 +3,7 @@ Test for bug #1996: Show wrapped callable for first class callables (PHP 8.1, te
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1,< 8.2');
+check_reqs('PHP < 8.2');
 ?>
 --INI--
 xdebug.mode=develop

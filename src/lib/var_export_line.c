@@ -17,15 +17,13 @@
 #include "lib/php-header.h"
 #include "ext/standard/php_string.h"
 #include "Zend/zend_closures.h"
-#if PHP_VERSION_ID >= 80100
-# if !defined(_MSC_VER)
-#   pragma GCC diagnostic push
-#   pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
-# endif
-# include "zend_enum.h"
-# if !defined(_MSC_VER)
-#   pragma GCC diagnostic pop
-# endif
+#if !defined(_MSC_VER)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#endif
+#include "zend_enum.h"
+#if !defined(_MSC_VER)
+# pragma GCC diagnostic pop
 #endif
 
 #include "var_export_line.h"
@@ -249,9 +247,7 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			break;
 
 		case IS_OBJECT: {
-#if PHP_VERSION_ID >= 80100
 			zend_class_entry *ce = Z_OBJCE_P(*struc);
-#endif
 
 #if PHP_VERSION_ID >= 80400
 			if (
@@ -267,7 +263,6 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			}
 #endif
 
-#if PHP_VERSION_ID >= 80100
 			if (ce->ce_flags & ZEND_ACC_ENUM) {
 				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(*struc));
 				xdebug_str_add_fmt(str, "enum %s::%s", ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval));
@@ -292,7 +287,6 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 
 				break;
 			}
-#endif
 
 			myht = xdebug_objdebug_pp(struc, XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO);
 

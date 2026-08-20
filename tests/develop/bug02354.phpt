@@ -3,7 +3,7 @@ Test for bug #2354: The __invoke frame in call stacks don't have the argument na
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP < 8.1');
+check_reqs('PHP < 8.2');
 ?>
 --INI--
 xdebug.mode=develop

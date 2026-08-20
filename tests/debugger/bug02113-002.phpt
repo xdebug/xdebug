@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #2113: SIGSEV is thrown on step into after Exception breakpoint [2] (>= PHP 8.1)
+Test for bug #2113: SIGSEV is thrown on step into after Exception breakpoint [2]
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1; dbgp');
+check_reqs('dbgp');
 ?>
 --FILE--
 <?php

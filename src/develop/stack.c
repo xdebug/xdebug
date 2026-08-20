@@ -982,23 +982,14 @@ static void clear_last_error()
 		PG(last_error_message) = NULL;
 	}
 	if (PG(last_error_file)) {
-# if PHP_VERSION_ID >= 80100
 		zend_string_release(PG(last_error_file));
-# else
-		free(PG(last_error_file));
-# endif
 		PG(last_error_file) = NULL;
 	}
 }
 
 /* Error callback for formatting stack traces */
-#if PHP_VERSION_ID >= 80100
 void xdebug_develop_error_cb(int orig_type, zend_string *error_filename, const unsigned int error_lineno, zend_string *message)
 {
-#else
-void xdebug_develop_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, zend_string *message)
-{
-#endif
 	char *error_type_str;
 	int display;
 	int type = orig_type & E_ALL;
@@ -1016,11 +1007,7 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 			if (!zend_string_equals(PG(last_error_message), message) ||
 				(!PG(ignore_repeated_source) && (
 					(PG(last_error_lineno) != (int)error_lineno) ||
-#if PHP_VERSION_ID >= 80100
 					!zend_string_equals(PG(last_error_file), error_filename)
-#else
-					strcmp(PG(last_error_file), error_filename) != 0
-#endif
 				))
 			) {
 					display = 1;
@@ -1069,19 +1056,11 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 	if (display) {
 		clear_last_error();
 		if (!error_filename) {
-#if PHP_VERSION_ID >= 80100
 			error_filename = zend_string_init(ZEND_STRL("Unknown"), 0);
-#else
-			error_filename = "Unknown";
-#endif
 		}
 		PG(last_error_type) = type;
 		PG(last_error_message) = zend_string_copy(message);
-#if PHP_VERSION_ID >= 80100
 		PG(last_error_file) = zend_string_copy(error_filename);
-#else
-		PG(last_error_file) = strdup(error_filename);
-#endif
 		PG(last_error_lineno) = error_lineno;
 	}
 
@@ -1094,11 +1073,7 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 				php_syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, ZSTR_VAL(message), GetCommandLine());
 			}
 #endif
-#if PHP_VERSION_ID >= 80100
 			xdebug_log_stack(error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno);
-#else
-			xdebug_log_stack(error_type_str, ZSTR_VAL(message), error_filename, error_lineno);
-#endif
 			if (XINI_DEV(dump_globals) && !(XINI_DEV(dump_once) && XG_LIB(dumped))) {
 				char *printable_stack = xdebug_get_printable_superglobals(0);
 
@@ -1126,11 +1101,7 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 		if ((PG(display_errors) || XINI_DEV(force_display_errors)) && !PG(during_request_startup)) {
 			char *printable_stack;
 
-#if PHP_VERSION_ID >= 80100
 			printable_stack = xdebug_handle_stack_trace(type, error_type_str, ZSTR_VAL(error_filename), error_lineno, ZSTR_VAL(message));
-#else
-			printable_stack = xdebug_handle_stack_trace(type, error_type_str, error_filename, error_lineno, ZSTR_VAL(message));
-#endif
 
 			if (XG_LIB(do_collect_errors) && (type != E_ERROR) && (type != E_COMPILE_ERROR) && (type != E_USER_ERROR)) {
 				xdebug_llist_insert_next(XG_DEV(collected_errors), XDEBUG_LLIST_TAIL(XG_DEV(collected_errors)), printable_stack);
@@ -1140,21 +1111,13 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 			}
 		} else if (XG_LIB(do_collect_errors)) {
 			char *printable_stack;
-#if PHP_VERSION_ID >= 80100
 			printable_stack = xdebug_get_printable_stack(PG(html_errors), type, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno, 1);
-#else
-			printable_stack = xdebug_get_printable_stack(PG(html_errors), type, ZSTR_VAL(message), error_filename, error_lineno, 1);
-#endif
 			xdebug_llist_insert_next(XG_DEV(collected_errors), XDEBUG_LLIST_TAIL(XG_DEV(collected_errors)), printable_stack);
 		}
 	}
 
 	{
-#if PHP_VERSION_ID >= 80100
 		zend_string *tmp_error_filename = zend_string_copy(error_filename);
-#else
-		zend_string *tmp_error_filename = zend_string_init(error_filename, strlen(error_filename), 0);
-#endif
 		xdebug_debugger_error_cb(tmp_error_filename, error_lineno, type, error_type_str, ZSTR_VAL(message));
 		zend_string_release(tmp_error_filename);
 	}

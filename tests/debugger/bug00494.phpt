@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #494: Private attributes of parent class unavailable when inheriting (< PHP 8.1)
+Test for bug #494: Private attributes of parent class unavailable when inheriting
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP < 8.1; dbgp');
+check_reqs('dbgp');
 ?>
 --FILE--
 <?php
@@ -33,7 +33,7 @@ dbgpRunFile( $filename, $commands );
 
 -> property_get -i 3 -n o
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="3"><property name="$o" fullname="$o" type="object" classname="def" children="1" numchildren="2" page="0" pagesize="32"><property name="arr" fullname="$o-&gt;arr" facet="private" type="null"></property><property name="*abc*arr" fullname="$o-&gt;*abc*arr" facet="private" type="array" children="1" numchildren="2"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="3"><property name="$o" fullname="$o" type="object" classname="def" children="1" numchildren="2" page="0" pagesize="32"><property name="*abc*arr" fullname="$o-&gt;*abc*arr" facet="private" type="array" children="1" numchildren="2"></property><property name="arr" fullname="$o-&gt;arr" facet="private" type="null"></property></property></response>
 
 -> detach -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>

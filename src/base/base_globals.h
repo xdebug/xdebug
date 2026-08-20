@@ -42,9 +42,8 @@ typedef struct _xdebug_nanotime_context {
 
 typedef struct _xdebug_base_globals_t {
 	xdebug_vector *stack;
-#if PHP_VERSION_ID >= 80100
 	xdebug_hash   *fiber_stacks;
-#endif
+
 	xdebug_nanotime_context nanotime_context;
 	uint64_t      start_nanotime;
 	unsigned int  working_tsc_clock; /* -1 = unknown, 0 = not available, 1 = available */

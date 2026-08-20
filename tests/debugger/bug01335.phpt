@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1335: Debugging with PhpStorm sometimes gives "can not get property" (>= PHP 8.1)
+Test for bug #1335: Debugging with PhpStorm sometimes gives "can not get property"
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1; dbgp');
+check_reqs('dbgp');
 ?>
 --FILE--
 <?php

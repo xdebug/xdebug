@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #2036: Segfault on fiber switch in finally block in garbage collected fiber (>= PHP 8.1, < PHP 8.4)
+Test for bug #2036: Segfault on fiber switch in finally block in garbage collected fiber (< PHP 8.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1, < 8.4');
+check_reqs('PHP < 8.4');
 ?>
 --INI--
 xdebug.mode=develop

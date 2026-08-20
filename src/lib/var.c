@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2025 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -920,11 +920,9 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 		zend_string *type_info = zend_type_to_string(info->type);
 		type_str = xdebug_str_new();
 
-# if PHP_VERSION_ID >= 80100
 		if (info->flags & ZEND_ACC_READONLY) {
 			xdebug_str_add_literal(type_str, "readonly ");
 		}
-# endif
 
 		xdebug_str_add_zstr(type_str, type_info);
 		zend_string_release(type_info);
@@ -1217,11 +1215,9 @@ char* xdebug_show_fname(xdebug_func f, int flags)
 			return xdstrdup("{zend_pass}");
 			break;
 
-#if PHP_VERSION_ID >= 80100
 		case XFUNC_FIBER:
 			return xdebug_sprintf("%s", ZSTR_VAL(f.function));
 			break;
-#endif
 
 		default:
 			return xdstrdup("{unknown}");

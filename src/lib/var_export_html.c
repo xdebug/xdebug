@@ -17,15 +17,13 @@
 #include "var_export_html.h"
 #include "lib_private.h"
 #include "Zend/zend_closures.h"
-#if PHP_VERSION_ID >= 80100
-# if !defined(_MSC_VER)
-#   pragma GCC diagnostic push
-#   pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
-# endif
-# include "zend_enum.h"
-# if !defined(_MSC_VER)
-#   pragma GCC diagnostic pop
-# endif
+#if !defined(_MSC_VER)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#endif
+#include "zend_enum.h"
+#if !defined(_MSC_VER)
+# pragma GCC diagnostic pop
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
@@ -245,8 +243,8 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 			break;
 
 		case IS_OBJECT: {
-#if PHP_VERSION_ID >= 80100
 			zend_class_entry *ce = Z_OBJCE_P(*struc);
+
 			if (ce->ce_flags & ZEND_ACC_ENUM) {
 				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(*struc));
 				xdebug_str_add_fmt(
@@ -274,7 +272,6 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 				xdebug_str_addc(str, '\n');
 				break;
 			}
-#endif
 
 			myht = xdebug_objdebug_pp(struc, XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO);
 			xdebug_str_add_fmt(str, "\n%*s", (level - 1) * 4, "");
@@ -418,14 +415,13 @@ static void xdebug_var_synopsis_html(zval **struc, xdebug_str *str, int level, i
 			break;
 
 		case IS_OBJECT: {
-#if PHP_VERSION_ID >= 80100
 			zend_class_entry *ce = Z_OBJCE_P(*struc);
+
 			if (ce->ce_flags & ZEND_ACC_ENUM) {
 				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(*struc));
 				xdebug_str_add_fmt( str, "<font color='%s'>enum(%s::%s)</font>", COLOR_OBJECT, ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval));
 				break;
 			}
-#endif
 
 			xdebug_str_add_fmt(str, "<font color='%s'>object(%s)[%d]</font>", COLOR_OBJECT, ZSTR_VAL(Z_OBJCE_P(*struc)->name), Z_OBJ_HANDLE_P(*struc));
 		} break;

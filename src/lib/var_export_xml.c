@@ -497,11 +497,9 @@ void xdebug_var_xml_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_
 
 	xdebug_zend_hash_apply_protection_begin(static_members);
 
-#if PHP_VERSION_ID >= 80100
 	if (ce->default_static_members_count && !CE_STATIC_MEMBERS(ce)) {
 		zend_class_init_statics(ce);
 	}
-#endif
 
 	ZEND_HASH_FOREACH_PTR(static_members, zpi) {
 		xdebug_var_xml_attach_property_with_contents(zpi, static_container, options, ce, STR_NAME_VAL(ce->name), &children);
@@ -630,13 +628,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			/* Adding static properties */
 			xdebug_zend_hash_apply_protection_begin(&ce->properties_info);
 
-#if PHP_VERSION_ID >= 80100
 			zend_class_init_statics(ce);
-#else
-			if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-				zend_class_init_statics(ce);
-			}
-#endif
 
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, zpi_val) {
 				object_item_add_zend_prop_to_merged_hash(zpi_val, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, Z_OBJ_P(*struc), ce);
@@ -655,7 +647,6 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, tmp_val) {
 					int flags = XDEBUG_OBJECT_ITEM_TYPE_PROPERTY;
 
-#if PHP_VERSION_ID >= 80100
 					if (ce->type != ZEND_INTERNAL_CLASS && !HASH_KEY_IS_NUMERIC(key)) {
 						const char         *cls_name, *tmp_prop_name;
 						size_t              tmp_prop_name_len;
@@ -680,7 +671,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 #endif
 						}
 					}
-#endif
+
 					object_item_add_to_merged_hash(tmp_val, num, key, merged_hash, flags, Z_OBJ_P(*struc));
 				} ZEND_HASH_FOREACH_END();
 
@@ -689,14 +680,13 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 			xdebug_xml_add_attribute(node, "type", "object");
 
-#if PHP_VERSION_ID >= 80100 // Enums
 			{
 				zend_class_entry *ce = Z_OBJCE_P(*struc);
+
 				if (ce->ce_flags & ZEND_ACC_ENUM) {
 					xdebug_xml_expand_attribute_value(node, "facet", "enum");
 				}
 			}
-#endif
 
 			if (instanceof_function(Z_OBJCE_P(*struc), zend_ce_closure)) {
 #if PHP_VERSION_ID < 80200

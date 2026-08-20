@@ -3,7 +3,7 @@ Test for bug #2083: Constant defined with an enum case
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp; PHP >= 8.1');
+check_reqs('dbgp');
 ?>
 --FILE--
 <?php

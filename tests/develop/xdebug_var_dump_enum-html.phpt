@@ -1,10 +1,5 @@
 --TEST--
 xdebug_var_dump() with enums [html]
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1');
-?>
 --INI--
 date.timezone=UTC
 xdebug.mode=develop
