@@ -35,7 +35,7 @@ jobs:
                     coverage: none
                     # We need to use a specific version of Composer because we are using a specific version of the
                     # Symfony Demo which is not compatible with the latest versions of Composer
-                    tools: composer:v2.2.21
+                    tools: composer:v2.2.28
 
             -   name: Disable ASLR
                 # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
