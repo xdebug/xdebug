@@ -110,33 +110,6 @@ static int xdebug_object_element_export(zval *object, zval *zv_nptr, zend_ulong 
 	return 0;
 }
 
-#if PHP_VERSION_ID < 80200
-static void handle_closure(xdebug_str *str, zval *obj)
-{
-	const zend_function *closure_function;
-
-	if (Z_TYPE_P(obj) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(obj), zend_ce_closure)) {
-		return;
-	}
-
-	closure_function = zend_get_closure_method_def(Z_OBJ_P(obj));
-
-	xdebug_str_add_literal(str, "virtual $closure = \"");
-
-	if (closure_function->common.scope) {
-		if (closure_function->common.fn_flags & ZEND_ACC_STATIC) {
-			xdebug_str_add(str, ZSTR_VAL(closure_function->common.scope->name), 0);
-			xdebug_str_add_literal(str, "::");
-		} else {
-			xdebug_str_add_literal(str, "$this->");
-		}
-	}
-	xdebug_str_add_zstr(str, closure_function->common.function_name);
-
-	xdebug_str_add_literal(str, "\", ");
-}
-#endif
-
 void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options)
 {
 	HashTable *myht;
@@ -294,10 +267,6 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 				xdebug_str_add_literal(str, "class ");
 				xdebug_str_add(str, ZSTR_VAL(Z_OBJCE_P(*struc)->name), 0);
 				xdebug_str_add_literal(str, " { ");
-
-#if PHP_VERSION_ID < 80200
-				handle_closure(str, *struc);
-#endif
 
 				if (myht && (level <= options->max_depth)) {
 					options->runtime[level].current_element_nr = 0;

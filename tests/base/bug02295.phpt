@@ -2,11 +2,6 @@
 Test for bug #2295: var_dump(SensitiveParameterValue) segfaults
 --INI--
 xdebug.mode=develop
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.2');
-?>
 --FILE--
 <?php
 

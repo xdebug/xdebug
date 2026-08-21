@@ -689,57 +689,6 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			}
 
 			if (instanceof_function(Z_OBJCE_P(*struc), zend_ce_closure)) {
-#if PHP_VERSION_ID < 80200
-				xdebug_xml_node *closure_cont, *closure_func;
-				const zend_function *closure_function = zend_get_closure_method_def(Z_OBJ_P(*struc));
-
-				closure_cont = xdebug_xml_node_init("property");
-				xdebug_xml_add_attribute(closure_cont, "facet", "virtual readonly");
-				xdebug_xml_add_attribute(closure_cont, "name", "{closure}");
-				xdebug_xml_add_attribute(closure_cont, "type", "array");
-				xdebug_xml_add_attribute(closure_cont, "children", "1");
-				xdebug_xml_add_attribute(closure_cont, "page", "0");
-				xdebug_xml_add_attribute(closure_cont, "pagesize", "2");
-
-				if (closure_function->common.scope) {
-					xdebug_xml_node *closure_scope = xdebug_xml_node_init("property");
-					xdebug_xml_add_attribute(closure_scope, "facet", "readonly");
-					xdebug_xml_add_attribute(closure_scope, "name", "scope");
-					xdebug_xml_add_attribute(closure_scope, "type", "string");
-
-					if (closure_function->common.fn_flags & ZEND_ACC_STATIC) {
-						xdebug_xml_add_text_ex(
-							closure_scope,
-							ZSTR_VAL(closure_function->common.scope->name),
-							ZSTR_LEN(closure_function->common.scope->name),
-							0, 0
-						);
-					} else {
-						xdebug_xml_add_text_ex(closure_scope, (char*) "$this", 6, 0, 0);
-					}
-
-					xdebug_xml_add_child(closure_cont, closure_scope);
-					xdebug_xml_add_attribute(closure_cont, "numchildren", "2");
-				} else {
-					xdebug_xml_add_attribute(closure_cont, "numchildren", "1");
-				}
-
-				closure_func = xdebug_xml_node_init("property");
-				xdebug_xml_add_attribute(closure_func, "facet", "readonly");
-				xdebug_xml_add_attribute(closure_func, "name", "function");
-				xdebug_xml_add_attribute(closure_func, "type", "string");
-				xdebug_xml_add_text_ex(
-					closure_func,
-					ZSTR_VAL(closure_function->common.function_name),
-					ZSTR_LEN(closure_function->common.function_name),
-					0, 0
-				);
-				xdebug_xml_add_child(closure_cont, closure_func);
-
-				xdebug_xml_add_child(node, closure_cont);
-				extra_children = 1;
-#endif
-
 				xdebug_xml_expand_attribute_value(node, "facet", "closure");
 			}
 

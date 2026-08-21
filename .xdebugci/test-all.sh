@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATTERN=${1:-'^master|^8.*dev'}
+PATTERN=${1:-'^master|^8.[2-9]*dev'}
 
 PHP=`which php`
 if [[ "${PHP}" == "" ]]; then

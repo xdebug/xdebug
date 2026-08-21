@@ -1,10 +1,5 @@
 --TEST--
-Test for bug #1996: Show wrapped callable for first class callables (>= PHP 8.2, ansi)
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.2');
-?>
+Test for bug #1996: Show wrapped callable for first class callables (ansi)
 --INI--
 xdebug.mode=develop
 html_errors=0
@@ -32,7 +27,7 @@ $closure = $dateTime->format(...);
 var_dump($closure);
 ?>
 --EXPECTF--
-[1m%sbug01996-002-ansi-php82.php[22m:[1m3[22m:
+[1m%sbug01996-002-ansi.php[22m:[1m3[22m:
 [1mclass[22m [31mClosure[0m#%d ([32m2[0m) {
   [32m[1mpublic[22m[0m $function [0m=>[0m
   [1mstring[22m([32m6[0m) "[31msubstr[0m"
@@ -46,7 +41,7 @@ var_dump($closure);
     [1mstring[22m([32m10[0m) "[31m<optional>[0m"
   }
 }
-[1m%sbug01996-002-ansi-php82.php[22m:[1m11[22m:
+[1m%sbug01996-002-ansi.php[22m:[1m11[22m:
 [1mclass[22m [31mClosure[0m#%d ([32m2[0m) {
   [32m[1mpublic[22m[0m $function [0m=>[0m
   [1mstring[22m([32m12[0m) "[31muser_defined[0m"
@@ -58,7 +53,7 @@ var_dump($closure);
     [1mstring[22m([32m10[0m) "[31m<required>[0m"
   }
 }
-[1m%sbug01996-002-ansi-php82.php[22m:[1m15[22m:
+[1m%sbug01996-002-ansi.php[22m:[1m15[22m:
 [1mclass[22m [31mClosure[0m#%d ([32m2[0m) {
   [32m[1mpublic[22m[0m $function [0m=>[0m
   [1mstring[22m([32m35[0m) "[31mDateTimeImmutable::createFromFormat[0m"
@@ -72,7 +67,7 @@ var_dump($closure);
     [1mstring[22m([32m10[0m) "[31m<optional>[0m"
   }
 }
-[1m%sbug01996-002-ansi-php82.php[22m:[1m20[22m:
+[1m%sbug01996-002-ansi.php[22m:[1m20[22m:
 [1mclass[22m [31mClosure[0m#%d ([32m3[0m) {
   [32m[1mpublic[22m[0m $function [0m=>[0m
   [1mstring[22m([32m25[0m) "[31mDateTimeImmutable::format[0m"

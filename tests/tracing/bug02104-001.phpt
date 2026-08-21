@@ -1,10 +1,5 @@
 --TEST--
 Test for bug #2104: SensitiveParameter attribute in trace files
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.2');
-?>
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=no

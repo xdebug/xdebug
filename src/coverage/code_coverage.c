@@ -314,16 +314,6 @@ static void opcode_type_filter(xdebug_coverage_file *file, zend_op opcode, int a
 
 #define XDEBUG_ZNODE_ELEM(node,var) node.var
 
-#if PHP_VERSION_ID < 80200
-static zend_always_inline bool xdebug_string_equals_cstr(const zend_string *s1, const char *s2, size_t s2_length)
-{
-	return ZSTR_LEN(s1) == s2_length && !memcmp(ZSTR_VAL(s1), s2, s2_length);
-}
-# define xdebug_string_equals_literal(str, literal) xdebug_string_equals_cstr(str, "" literal, sizeof(literal) - 1)
-#else
-# define xdebug_string_equals_literal  zend_string_equals_literal
-#endif
-
 static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count, int *jumps)
 {
 #if ZEND_USE_ABS_JMP_ADDR
@@ -346,14 +336,6 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 		*jump_count = 2;
 		return 1;
-
-#if PHP_VERSION_ID < 80200
-	} else if (opcode.opcode == ZEND_JMPZNZ) {
-		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
-		jumps[1] = position + ((int32_t) opcode.extended_value / (int32_t) sizeof(zend_op));
-		*jump_count = 2;
-		return 1;
-#endif
 
 	} else if (opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
 		jumps[0] = position + 1;
@@ -421,7 +403,7 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		opcode.opcode == ZEND_INIT_FCALL
 	) {
 		zval *func_name = RT_CONSTANT(&opa->opcodes[position], opcode.op2);
-		if (xdebug_string_equals_literal(Z_PTR_P(func_name), "exit")) {
+		if (zend_string_equals_literal(Z_PTR_P(func_name), "exit")) {
 			int level = 0;
 			uint32_t start = position + 1;
 
