@@ -1,10 +1,5 @@
 --TEST--
-Test for bug #1996: Show wrapped callable for closures (text) (< PHP 8.2)
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP < 8.2');
-?>
+Test for bug #1996: Show wrapped callable for closures (text)
 --INI--
 xdebug.mode=develop
 html_errors=0
@@ -32,24 +27,24 @@ $closure = Closure::fromCallable([$dateTime, 'format']);
 var_dump($closure);
 ?>
 --EXPECTF--
-%sbug01996-001-text-php81.php:3:
-class Closure#1 (1) {
-  virtual $closure =>
-  "substr"
+%sbug01996-001-text.php:3:
+class Closure#1 (2) {
+  public $function =>
+  string(6) "substr"
   public $parameter =>
   array(3) {
-    '$%s' =>
+    '$string' =>
     string(10) "<required>"
-    '$%s' =>
+    '$offset' =>
     string(10) "<required>"
     '$length' =>
     string(10) "<optional>"
   }
 }
-%sbug01996-001-text-php81.php:11:
-class Closure#2 (1) {
-  virtual $closure =>
-  "user_defined"
+%sbug01996-001-text.php:11:
+class Closure#2 (2) {
+  public $function =>
+  string(12) "user_defined"
   public $parameter =>
   array(2) {
     '$a' =>
@@ -58,24 +53,24 @@ class Closure#2 (1) {
     string(10) "<required>"
   }
 }
-%sbug01996-001-text-php81.php:15:
-class Closure#1 (1) {
-  virtual $closure =>
-  "DateTimeImmutable::createFromFormat"
+%sbug01996-001-text.php:15:
+class Closure#1 (2) {
+  public $function =>
+  string(35) "DateTimeImmutable::createFromFormat"
   public $parameter =>
   array(3) {
     '$format' =>
     string(10) "<required>"
-    '$%s' =>
+    '$datetime' =>
     string(10) "<required>"
-    '$%s' =>
+    '$timezone' =>
     string(10) "<optional>"
   }
 }
-%sbug01996-001-text-php81.php:20:
-class Closure#3 (2) {
-  virtual $closure =>
-  "$this->format"
+%sbug01996-001-text.php:20:
+class Closure#3 (3) {
+  public $function =>
+  string(25) "DateTimeImmutable::format"
   public $this =>
   class DateTimeImmutable#2 (3) {
     public $date =>

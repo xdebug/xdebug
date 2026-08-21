@@ -3,7 +3,7 @@ Test for bug #2104: SensitiveParameter attribute in trace files for internal fun
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('ext hash; PHP >= 8.2');
+check_reqs('ext hash');
 ?>
 --INI--
 xdebug.mode=trace

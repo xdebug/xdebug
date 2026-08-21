@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1996: Visualing closures (>= PHP 8.2)
+Test for bug #1996: Visualing closures
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.2; dbgp');
+check_reqs('dbgp');
 ?>
 --FILE--
 <?php

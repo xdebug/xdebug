@@ -19,10 +19,10 @@ if (PHP_XDEBUG != 'no') {
 	var files = "xdebug.c";
 
 	var XDEBUG_PHP_VERSION = 10000 * PHP_VERSION + 100 * PHP_MINOR_VERSION + 1 * PHP_RELEASE_VERSION;
-	if (XDEBUG_PHP_VERSION < 80100) {
-		ERROR("not supported. Need a PHP version >= 8.1.0 and < 8.7.0 (found " + XDEBUG_PHP_VERSION + ")");
+	if (XDEBUG_PHP_VERSION < 80200) {
+		ERROR("not supported. Need a PHP version >= 8.2.0 and < 8.7.0 (found " + XDEBUG_PHP_VERSION + ")");
 	} else if (XDEBUG_PHP_VERSION >= 80700) {
-		ERROR("not supported. Need a PHP version >= 8.1.0 and < 8.7.0 (found " + XDEBUG_PHP_VERSION + ")");
+		ERROR("not supported. Need a PHP version >= 8.2.0 and < 8.7.0 (found " + XDEBUG_PHP_VERSION + ")");
 	} else {
 		MESSAGE("supported (" + XDEBUG_PHP_VERSION + ")");
 	}

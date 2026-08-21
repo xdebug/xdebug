@@ -19,9 +19,7 @@
 #include "php_globals.h"
 #include "zend_closures.h"
 #include "zend_exceptions.h"
-#if PHP_VERSION_ID >= 80200
-# include "zend_attributes.h"
-#endif
+#include "zend_attributes.h"
 
 #include "zend_interfaces.h"
 
@@ -411,24 +409,18 @@ static void collect_params_internal(function_stack_entry *fse, zend_execute_data
 
 	/* Collect Arguments */
 	for (i = 0; i < arguments_sent; i++) {
-#if PHP_VERSION_ID >= 80200
 		zend_attribute *attribute;
-#else
-		void *attribute = NULL;
-#endif
 
 		/* The index in ZEND_CALL_ARG is 1-based */
 #if DEBUG
 		fprintf(stderr, "Copying argument %d\n", i);
 #endif
-#if PHP_VERSION_ID >= 80200
 		attribute = zend_get_parameter_attribute_str(
 			zdata->func->common.attributes,
 			"sensitiveparameter",
 			sizeof("sensitiveparameter") - 1,
 			i
 		);
-#endif
 		if (attribute && fse->var[i].is_variadic) {
 			variadic_sensitive = 1;
 		}
@@ -534,11 +526,7 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 
 	/* Collect Arguments */
 	for (i = 0; i < fse->varc; i++) {
-#if PHP_VERSION_ID >= 80200
 		zend_attribute *attribute;
-#else
-		void *attribute = NULL;
-#endif
 
 		/* The index in ZEND_CALL_ARG is 1-based */
 #if DEBUG
@@ -548,14 +536,12 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 #if DEBUG
 			fprintf(stderr, "ARG ");
 #endif
-#if PHP_VERSION_ID >= 80200
 			attribute = zend_get_parameter_attribute_str(
 				zdata->func->common.attributes,
 				"sensitiveparameter",
 				sizeof("sensitiveparameter") - 1,
 				i
 			);
-#endif
 			if (attribute && fse->var[i].is_variadic) {
 				variadic_sensitive = 1;
 			}
@@ -997,27 +983,6 @@ static void xdebug_execute_internal_end(zend_execute_data *execute_data, zval *r
 	}
 }
 
-#if PHP_VERSION_ID < 80200
-static void xdebug_execute_internal(zend_execute_data *execute_data, zval *return_value)
-{
-	bool run_internal_handler = should_run_internal_handler(execute_data);
-
-	if (run_internal_handler) {
-		xdebug_execute_internal_begin(execute_data);
-	}
-
-	if (xdebug_old_execute_internal) {
-		xdebug_old_execute_internal(execute_data, return_value);
-	} else {
-		execute_internal(execute_data, return_value);
-	}
-
-	if (run_internal_handler) {
-		xdebug_execute_internal_end(execute_data, return_value);
-	}
-}
-#endif
-
 static void xdebug_execute_begin(zend_execute_data *execute_data)
 {
 	/* If the stack vector hasn't been initialised yet, we should abort immediately */
@@ -1028,11 +993,10 @@ static void xdebug_execute_begin(zend_execute_data *execute_data)
 	if (should_run_user_handler(execute_data)) {
 		xdebug_execute_user_code_begin(execute_data);
 	}
-#if PHP_VERSION_ID >= 80200
+
 	if (should_run_internal_handler(execute_data)) {
 		xdebug_execute_internal_begin(execute_data);
 	}
-#endif
 }
 
 static void xdebug_execute_end(zend_execute_data *execute_data, zval *retval)
@@ -1045,11 +1009,10 @@ static void xdebug_execute_end(zend_execute_data *execute_data, zval *retval)
 	if (should_run_user_handler(execute_data)) {
 		xdebug_execute_user_code_end(execute_data, retval);
 	}
-#if PHP_VERSION_ID >= 80200
+
 	if (should_run_internal_handler(execute_data)) {
 		xdebug_execute_internal_end(execute_data, retval);
 	}
-#endif
 }
 
 static zend_observer_fcall_handlers xdebug_observer_init(zend_execute_data *execute_data)
@@ -1287,12 +1250,6 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	/* Include, Require, Eval */
 	xdebug_old_execute_ex = zend_execute_ex;
 	zend_execute_ex = xdebug_execute_ex;
-
-#if PHP_VERSION_ID < 80200
-	/* Internal Functions, since 8.2 they're also observed */
-	xdebug_old_execute_internal = zend_execute_internal;
-	zend_execute_internal = xdebug_execute_internal;
-#endif
 
 	XG_BASE(error_reporting_override) = 0;
 	XG_BASE(error_reporting_overridden) = 0;

@@ -1,17 +1,12 @@
 --TEST--
-Test for bug #1996: Show wrapped callable for closures (text) (>= PHP 8.2)
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.2');
-?>
+Test for bug #1996: Show wrapped callable for first class callables (text)
 --INI--
 xdebug.mode=develop
 html_errors=0
-date.timezone=UTC
+xdebug.cli_color=0
 --FILE--
 <?php
-$closure = Closure::fromCallable('substr');
+$closure = substr(...);
 var_dump($closure);
 
 
@@ -19,21 +14,21 @@ function user_defined($a, $b)
 {
 	return substr($a, $b);
 }
-$closure = Closure::fromCallable('user_defined');
+$closure = user_defined(...);
 var_dump($closure);
 
 
-$closure = Closure::fromCallable(['DateTimeImmutable', 'createFromFormat']);
+$closure = DateTimeImmutable::createFromFormat(...);
 var_dump($closure);
 
 
 $dateTime = new DateTimeImmutable("2021-07-22");
-$closure = Closure::fromCallable([$dateTime, 'format']);
+$closure = $dateTime->format(...);
 var_dump($closure);
 ?>
 --EXPECTF--
-%sbug01996-001-text-php82.php:3:
-class Closure#1 (2) {
+%sbug01996-002-text.php:3:
+class Closure#%d (2) {
   public $function =>
   string(6) "substr"
   public $parameter =>
@@ -46,8 +41,8 @@ class Closure#1 (2) {
     string(10) "<optional>"
   }
 }
-%sbug01996-001-text-php82.php:11:
-class Closure#2 (2) {
+%sbug01996-002-text.php:11:
+class Closure#%d (2) {
   public $function =>
   string(12) "user_defined"
   public $parameter =>
@@ -58,8 +53,8 @@ class Closure#2 (2) {
     string(10) "<required>"
   }
 }
-%sbug01996-001-text-php82.php:15:
-class Closure#1 (2) {
+%sbug01996-002-text.php:15:
+class Closure#%d (2) {
   public $function =>
   string(35) "DateTimeImmutable::createFromFormat"
   public $parameter =>
@@ -72,12 +67,12 @@ class Closure#1 (2) {
     string(10) "<optional>"
   }
 }
-%sbug01996-001-text-php82.php:20:
-class Closure#3 (3) {
+%sbug01996-002-text.php:20:
+class Closure#%d (3) {
   public $function =>
   string(25) "DateTimeImmutable::format"
   public $this =>
-  class DateTimeImmutable#2 (3) {
+  class DateTimeImmutable#%d (3) {
     public $date =>
     string(26) "2021-07-22 00:00:00.000000"
     public $timezone_type =>

@@ -114,7 +114,6 @@ void xdebug_str_add_uint64(xdebug_str *xs, uint64_t num)
 	xdebug_str_internal_addl(xs, pos, &buffer[20] - pos, 0);
 }
 
-#if PHP_VERSION_ID >= 80200
 void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 {
 	int size;
@@ -146,22 +145,6 @@ void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 
 	assert(0);
 }
-#else
-void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
-{
-	smart_str buf = {0};
-
-	php_printf_to_smart_str(&buf, fmt, argv);
-
-	if (!buf.s) {
-		return;
-	}
-
-	xdebug_str_add_zstr(xs, buf.s);
-
-	smart_str_free(&buf);
-}
-#endif
 
 void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 {

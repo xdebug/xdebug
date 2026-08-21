@@ -17,11 +17,11 @@ if test "$PHP_XDEBUG" != "no"; then
   PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
   PHP_XDEBUG_MAJOR_VERSION=`${PHP_CONFIG} --version | sed 's/^\([[0-9]]\.[[0-9]]\).*/\1/'`
   PHP_XDEBUG_FOUND_VERNUM=`${PHP_CONFIG} --vernum`
-  if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "80100"; then
-    AC_MSG_ERROR([not supported. Need a PHP version >= 8.1.0 and < 8.7.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+  if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "80200"; then
+    AC_MSG_ERROR([not supported. Need a PHP version >= 8.2.0 and < 8.7.0 (found $PHP_XDEBUG_FOUND_VERSION)])
   else
     if test "$PHP_XDEBUG_FOUND_VERNUM" -ge "80700"; then
-      AC_MSG_ERROR([not supported. Need a PHP version >= 8.1.0 and < 8.7.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+      AC_MSG_ERROR([not supported. Need a PHP version >= 8.2.0 and < 8.7.0 (found $PHP_XDEBUG_FOUND_VERSION)])
     else
       AC_MSG_RESULT([supported ($PHP_XDEBUG_FOUND_VERSION)])
       PHP_SUBST(PHP_XDEBUG_MAJOR_VERSION)

@@ -1,10 +1,5 @@
 --TEST--
 Test for bug #2104: SensitiveParameter attribute in stack traces
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.2');
-?>
 --INI--
 html_errors=0
 xdebug.mode=develop
