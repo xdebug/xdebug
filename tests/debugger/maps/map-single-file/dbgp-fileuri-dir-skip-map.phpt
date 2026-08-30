@@ -1,5 +1,5 @@
 --TEST--
-DBGP: fileuri with multiple lines for file path map
+DBGP: fileuri with directory skipped path map
 --SKIPIF--
 <?php
 require __DIR__ . '/../../../utils.inc';
@@ -8,9 +8,9 @@ check_reqs('dbgp');
 --FILE--
 <?php
 require __DIR__ . '/../../dbgp/dbgpclient.php';
-$filename = dirname(__FILE__) . '/file-uri-file2.inc';
+$filename = dirname(__FILE__) . '/file-uri-dir/file.inc';
 
-$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'dbgp-fileuri-lines-map.txt';
+$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'dbgp-fileuri-dir-skip-map.txt';
 @unlink( $xdebugLogFileName );
 
 $commands = array(
@@ -35,5 +35,5 @@ echo file_get_contents( $xdebugLogFileName );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
-<init %s fileuri="file:///var/www/projects/xdebug-test/fake-local-file2.php" %s></init>
+<init %s fileuri="%sfile.inc" %s></init>
 %A
