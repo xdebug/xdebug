@@ -11,5 +11,4 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 cd ${DIR}/..
 
-
-PHP_DIR=/tmp/php-build/workspace/install .xdebugci/test-all.sh '^master|^8.*dev'
+PHP_DIR=/tmp/php-build/workspace/install .xdebugci/test-all.sh '^master|^8.[2-9]*dev'
