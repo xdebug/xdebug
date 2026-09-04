@@ -14,24 +14,22 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef __HAVE_USEFULSTUFF_H__
-#define __HAVE_USEFULSTUFF_H__
+#ifndef __HAVE_LIB_ARG_H__
+#define __HAVE_LIB_ARG_H__
 
-#include "php_xdebug.h"
-#include "src/lib/compat.h"
+#include "str.h"
 
-bool xdebug_is_printable(const char *str, size_t len);
-char* xdebug_strrstr(const char* haystack, const char* needle);
+typedef struct xdebug_arg {
+	int    c;
+	char **args;
+} xdebug_arg;
 
-#ifndef XDEBUG_NO_PHP_FEATURES
-char *xdebug_zstr_path_to_url(zend_string *string);
-char *xdebug_xdebug_str_path_to_url(xdebug_str *string);
-char *xdebug_path_from_url(zend_string *fileurl);
+xdebug_arg *xdebug_arg_ctor(void);
+void xdebug_arg_dtor(xdebug_arg *arg);
 
-FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **new_fname);
-int xdebug_format_output_filename(char **filename, char *format, char *script_name);
-int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno);
-int xdebug_format_filename(char **formatted_name, const char *default_format, zend_string *filename);
-#endif
+xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end);
+void xdebug_explode(const char *delim, const char *str, xdebug_arg *args, int limit);
 
-#endif
+const char* xdebug_memnstr(const char *haystack, const char *needle, int needle_len, const char *end);
+
+#endif // __HAVE_LIB_ARG_H__
