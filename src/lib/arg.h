@@ -1,0 +1,35 @@
+/*
+   +----------------------------------------------------------------------+
+   | Xdebug                                                               |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2002-2026 Derick Rethans                               |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 1.01 of the Xdebug license,   |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | https://xdebug.org/license.php                                       |
+   | If you did not receive a copy of the Xdebug license and are unable   |
+   | to obtain it through the world-wide-web, please send a note to       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
+   +----------------------------------------------------------------------+
+ */
+
+#ifndef __HAVE_LIB_ARG_H__
+#define __HAVE_LIB_ARG_H__
+
+#include "str.h"
+
+typedef struct xdebug_arg {
+	int    c;
+	char **args;
+} xdebug_arg;
+
+xdebug_arg *xdebug_arg_ctor(void);
+void xdebug_arg_dtor(xdebug_arg *arg);
+
+xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end);
+void xdebug_explode(const char *delim, const char *str, xdebug_arg *args, int limit);
+
+const char* xdebug_memnstr(const char *haystack, const char *needle, int needle_len, const char *end);
+
+#endif // __HAVE_LIB_ARG_H__
