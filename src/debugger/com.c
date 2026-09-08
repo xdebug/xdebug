@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,6 +53,7 @@
 #include "debugger_private.h"
 #include "handler_dbgp.h"
 #include "ip_info.h"
+#include "lib/arg.h"
 #include "lib/crc32.h"
 #include "lib/log.h"
 #include "lib/trim.h"

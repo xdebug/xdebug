@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,6 +59,7 @@
 #include "debugger/com.h"
 #include "gcstats/gc_stats.h"
 #include "lib/usefulstuff.h"
+#include "lib/arg.h"
 #include "lib/lib.h"
 #include "lib/llist.h"
 #include "lib/log.h"

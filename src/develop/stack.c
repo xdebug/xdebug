@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,7 @@
 
 #include "base/filter.h"
 #include "coverage/code_coverage.h"
+#include "lib/arg.h"
 #include "lib/compat.h"
 #include "lib/lib_private.h"
 #include "lib/str.h"
