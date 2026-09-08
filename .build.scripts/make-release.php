@@ -268,12 +268,13 @@ $xml = <<<ENDXML
         '7.2' => [ 'src' => '3.1.6',       'win' => '3.1.6' ],
         '7.3' => [ 'src' => '3.1.6',       'win' => '3.1.6' ],
         '7.4' => [ 'src' => '3.1.6',       'win' => '3.1.6' ],
-        '8.0' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
-        '8.1' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
+        '8.0' => [ 'src' => '3.5.3',       'win' => '3.5.3' ],
+        '8.1' => [ 'src' => '3.5.3',       'win' => '3.5.3' ],
         '8.2' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
         '8.3' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
         '8.4' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
         '8.5' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
+        '8.6' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
     ];
 
 ENDXML;
