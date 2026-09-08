@@ -28,6 +28,7 @@
 
 #include "base/filter.h"
 #include "coverage/code_coverage.h"
+#include "lib/arg.h"
 #include "lib/compat.h"
 #include "lib/lib_private.h"
 #include "lib/str.h"

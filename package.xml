@@ -116,6 +116,8 @@ Thu, Dec 04, 2025 - Xdebug 3.5.0
     <dir name="lib">
      <file name="usefulstuff.c" role="src" />
      <file name="usefulstuff.h" role="src" />
+     <file name="arg.c" role="src" />
+     <file name="arg.h" role="src" />
      <file name="cmd_parser.c" role="src" />
      <file name="cmd_parser.h" role="src" />
      <file name="compat.c" role="src" />
@@ -146,6 +148,8 @@ Thu, Dec 04, 2025 - Xdebug 3.5.0
      <file name="stripcslashes.c" role="src" />
      <file name="stripcslashes.h" role="src" />
      <file name="strrnchr.h" role="src" />
+     <file name="system_utils.c" role="src" />
+     <file name="system_utils.h" role="src" />
      <file name="timing.c" role="src" />
      <file name="timing.h" role="src" />
      <file name="trim.c" role="src" />

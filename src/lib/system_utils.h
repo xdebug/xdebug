@@ -13,25 +13,20 @@
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
  */
+#ifndef __XDEBUG_SYSTEM_UTILS_H__
+#define __XDEBUG_SYSTEM_UTILS_H__
 
-#ifndef __HAVE_USEFULSTUFF_H__
-#define __HAVE_USEFULSTUFF_H__
-
-#include "php_xdebug.h"
-#include "src/lib/compat.h"
-
-bool xdebug_is_printable(const char *str, size_t len);
-char* xdebug_strrstr(const char* haystack, const char* needle);
-
-#ifndef XDEBUG_NO_PHP_FEATURES
-char *xdebug_zstr_path_to_url(zend_string *string);
-char *xdebug_xdebug_str_path_to_url(xdebug_str *string);
-char *xdebug_path_from_url(zend_string *fileurl);
-
-FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **new_fname);
-int xdebug_format_output_filename(char **filename, char *format, char *script_name);
-int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno);
-int xdebug_format_filename(char **formatted_name, const char *default_format, zend_string *filename);
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+#ifdef __linux__
+int xdebug_scan_mountinfo_for_private_tmp(const char *buffer, char **private_tmp);
+int xdebug_read_systemd_private_tmp_directory(char **private_tmp);
 #endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __XDEBUG_SYSTEM_UTILS_H__
