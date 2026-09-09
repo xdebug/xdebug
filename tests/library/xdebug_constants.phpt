@@ -12,4 +12,4 @@ if (array_key_exists('xdebug', $constants)) {
 }
 ?>
 --EXPECT--
-Constants: available: 17
+Constants: available: 18
