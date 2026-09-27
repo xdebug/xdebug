@@ -189,7 +189,7 @@ static int xdebug_lib_set_mode_item(const char *mode, int len)
 static int xdebug_lib_set_mode_from_setting(const char *mode)
 {
 	const char *mode_ptr = mode;
-	char       *comma    = NULL;
+	const char *comma    = NULL;
 	int         errors   = 0;
 
 	xdebug_global_mode = 0;

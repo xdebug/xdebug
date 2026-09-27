@@ -70,13 +70,13 @@ bool xdebug_is_printable(const char *str, size_t len)
 	return true;
 }
 
-char* xdebug_strrstr(const char* haystack, const char* needle)
+const char* xdebug_strrstr(const char* haystack, const char* needle)
 {
-	char  *loc = NULL;
-	char  *found = NULL;
-	size_t pos = 0;
+	const char   *loc = NULL;
+	const char   *found = NULL;
+	size_t        pos = 0;
 
-	while ((found = strstr(haystack + pos, needle)) != 0) {
+	while ((found = strstr((const char*) haystack + pos, needle)) != 0) {
 		loc = found;
 		pos = (found - haystack) + 1;
 	}
@@ -163,7 +163,8 @@ char *xdebug_path_from_url(zend_string *fileurl)
 	int l = 0;
 	int i;
 #endif
-	char *tmp = NULL, *ret = NULL;
+	const char *tmp = NULL;
+	char *ret = NULL;
 
 	dfp = xdstrdup(efp);
 	fp = dfp;
