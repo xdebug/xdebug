@@ -235,7 +235,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 		escaped = estrdup(buffer);
 	} else {
 		zend_string *tmp;
-		char *first_closing = strchr(buffer, ']');
+		char *first_closing = (char*) strchr(buffer, ']');
 
 		/* We do need to escape HTML entities here, as HTML chars could be in
 		 * the error message. However, PHP in some circumstances also adds an
@@ -908,7 +908,8 @@ static void php_output_error(const char *error)
 
 char *xdebug_strip_php_stack_trace(char *buffer)
 {
-	char *tmp_buf, *p;
+	char *tmp_buf;
+	const char *p;
 
 	if (strncmp(buffer, "Uncaught ", 9) != 0) {
 		return NULL;

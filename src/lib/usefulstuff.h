@@ -21,7 +21,7 @@
 #include "src/lib/compat.h"
 
 bool xdebug_is_printable(const char *str, size_t len);
-char* xdebug_strrstr(const char* haystack, const char* needle);
+const char* xdebug_strrstr(const char* haystack, const char* needle);
 
 #ifndef XDEBUG_NO_PHP_FEATURES
 char *xdebug_zstr_path_to_url(zend_string *string);
