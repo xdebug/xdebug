@@ -10,7 +10,7 @@ check_reqs('dbgp');
 require __DIR__ . '/../../dbgp/dbgpclient.php';
 $filename = dirname(__FILE__) . '/file-uri-file1.inc';
 
-$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_ignore_yes_env.txt';
+$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'dbgp-fileuri-file-map.txt';
 @unlink( $xdebugLogFileName );
 
 $commands = array(
