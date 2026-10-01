@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: abb3d6c16210384b6ac37292e3e46713125c8b18 */
+ * Stub hash: 19ea8771d76341582335b1ec1bf6d8fa42d262b1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_break, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -30,7 +30,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_get_code_coverage, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xdebug_get_collected_errors, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_get_collected_errors, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, emptyList, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
@@ -58,7 +58,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_xdebug_get_tracefile_name arginfo_xdebug_dump_superglobals
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xdebug_info, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, category, IS_STRING, 0, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, category, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_xdebug_is_debugger_active arginfo_xdebug_break
@@ -120,7 +120,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xdebug_var_dump, 0, 0, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, variable, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(xdebug_break);
 ZEND_FUNCTION(xdebug_call_class);
 ZEND_FUNCTION(xdebug_call_file);
@@ -162,7 +161,6 @@ ZEND_FUNCTION(xdebug_stop_gcstats);
 ZEND_FUNCTION(xdebug_stop_trace);
 ZEND_FUNCTION(xdebug_time_index);
 ZEND_FUNCTION(xdebug_var_dump);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xdebug_break, arginfo_xdebug_break)
