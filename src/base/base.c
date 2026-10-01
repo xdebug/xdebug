@@ -1525,6 +1525,7 @@ PHP_FUNCTION(xdebug_set_time_limit)
 {
 	if (!xdebug_is_debug_connection_active()) {
 		orig_set_time_limit_func(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		return;
 	}
 
 	RETURN_FALSE;
