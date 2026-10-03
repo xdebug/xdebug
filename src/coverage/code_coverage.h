@@ -27,6 +27,7 @@ typedef struct _xdebug_coverage_globals_t {
 	zend_bool     code_coverage_unused;
 	zend_bool     code_coverage_dead_code_analysis;
 	zend_bool     code_coverage_branch_check;
+	zend_bool     code_coverage_hit_count;
 	long          code_coverage_filter_offset;
 	long          code_coverage_has_scanned_offset;
 	size_t        prefill_function_count;

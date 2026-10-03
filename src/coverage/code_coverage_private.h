@@ -51,6 +51,8 @@ typedef struct xdebug_coverage_file {
 	struct {
 		xdebug_mset        *hit_lines;
 		xdebug_hash        *functions;
+		unsigned int        hit_counts_size;
+		zend_long          *hit_counts;
 	} runtime;
 	int                 has_branch_info;
 } xdebug_coverage_file;
