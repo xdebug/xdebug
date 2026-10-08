@@ -61,7 +61,7 @@ $tmpBase = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_W
 [%d] [Path Mapping] INFO: Scanning for map files with pattern '%S%e%s%e.xdebug%e*.map'
 [%d] [Path Mapping] DEBUG: No map files found with pattern '%S%e%s%e.xdebug%e*.map'
 [%d] [Path Mapping] INFO: Scanning for map files with pattern '%S%e%s%e%sminimum-path%e.xdebug%e*.map'
-[%d] [Path Mapping] INFO: Reading mapping file '%S%e%s%e%sminimum-path%e.xdebug%eminimum.map'
+[%d] [Path Mapping] INFO: Reading mapping file '%S%e%s%e%sminimum-path%e.xdebug%eminimum.map' with '%sminimum-path' as current working directory
 [%d] [Path Mapping] DEBUG: Found 1 path mapping rules
 %A
 [%d] [Step Debug] <- breakpoint_set -i 3 -t line -f /var/www/minimum-path/fake-file.php -n 3

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -826,6 +826,13 @@ void xdebug_debugger_handle_breakpoints(function_stack_entry *fse, int breakpoin
 		if (!handle_breakpoints(fse, breakpoint_type, return_value)) {
 			xdebug_mark_debug_connection_not_active();
 		}
+	}
+}
+
+void xdebug_debugger_reapply_source_maps(void)
+{
+	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
+		XG_DBG(context).handler->reapply_source_maps(&(XG_DBG(context)));
 	}
 }
 

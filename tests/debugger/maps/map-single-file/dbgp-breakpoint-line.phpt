@@ -41,7 +41,7 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%emaps%e.xdebug%e*.map'
 [%d] [Path Mapping] DEBUG: No map files found with pattern '%sdebugger%emaps%e.xdebug%e*.map'
 [%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%emaps%emap-single-file%e.xdebug%e*.map'
-[%d] [Path Mapping] INFO: Reading mapping file '%sdebugger%emaps%emap-single-file%e.xdebug%esimple.map'
+[%d] [Path Mapping] INFO: Reading mapping file '%sdebugger%emaps%emap-single-file%e.xdebug%esimple.map' with '%smap-single-file' as current working directory
 [%d] [Path Mapping] DEBUG: Found 3 path mapping rules
 %A
 [%d] [Step Debug] <- breakpoint_set -i 3 -t line -f /var/www/projects/xdebug-test/fake-local-file.php -n 3
