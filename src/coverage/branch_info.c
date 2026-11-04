@@ -385,6 +385,9 @@ void xdebug_branch_info_mark_reached(zend_string *filename, char *function_name,
 					branch_info->branches[XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))]].outs_hit[i] = 1;
 				}
 			}
+			if (XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))] >= branch_info->size) {
+				ZEND_ASSERT(0 && "last_branch_nr out of bounds: stale value not reset by xdebug_coverage_execute_ex");
+			}
 		}
 
 		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))], tail_fse->function_nr);
