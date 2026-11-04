@@ -21,7 +21,14 @@
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
 #include "zend_smart_string.h"
+#if !defined(_MSC_VER)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#endif
 #include "zend_smart_str.h"
+#if !defined(_MSC_VER)
+#  pragma GCC diagnostic pop
+#endif
 #include "zend_closures.h"
 
 #include "php_xdebug.h"
