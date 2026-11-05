@@ -95,9 +95,9 @@ void xdebug_develop_rinit()
 
 	/* Admin for last exception trace */
 	XG_DEV(last_exception_trace).next_slot = 0;
+	XG_DEV(last_exception_trace).shutting_down = false;
 	for (i = 0; i < XDEBUG_LAST_EXCEPTION_TRACE_SLOTS; i++) {
-		XG_DEV(last_exception_trace).obj_ptr[i] = NULL;
-		ZVAL_UNDEF(&XG_DEV(last_exception_trace).stack_trace[i]);
+		ZVAL_UNDEF(&XG_DEV(last_exception_trace).weak_map[i]);
 	}
 }
 
@@ -106,11 +106,14 @@ void xdebug_develop_rshutdown()
 	int i;
 
 	/* Admin for last exception trace */
-	XG_DEV(last_exception_trace).next_slot = 0;
+	XG_DEV(last_exception_trace).shutting_down = true;
 	for (i = 0; i < XDEBUG_LAST_EXCEPTION_TRACE_SLOTS; i++) {
-		if (XG_DEV(last_exception_trace).obj_ptr[i]) {
-			XG_DEV(last_exception_trace).obj_ptr[i] = NULL;
-			zval_ptr_dtor(&XG_DEV(last_exception_trace).stack_trace[i]);
+		if (!Z_ISUNDEF(XG_DEV(last_exception_trace).weak_map[i])) {
+			zval old_map;
+
+			ZVAL_COPY_VALUE(&old_map, &XG_DEV(last_exception_trace).weak_map[i]);
+			ZVAL_UNDEF(&XG_DEV(last_exception_trace).weak_map[i]);
+			zval_ptr_dtor(&old_map);
 		}
 	}
 }

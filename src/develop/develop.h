@@ -43,9 +43,9 @@ typedef struct _xdebug_develop_globals_t {
 
 	/* last exception stack trace */
 	struct {
-		int          next_slot;
-		zend_object *obj_ptr[XDEBUG_LAST_EXCEPTION_TRACE_SLOTS];
-		zval         stack_trace[XDEBUG_LAST_EXCEPTION_TRACE_SLOTS];
+		int  next_slot;
+		bool shutting_down;
+		zval weak_map[XDEBUG_LAST_EXCEPTION_TRACE_SLOTS];
 	} last_exception_trace;
 } xdebug_develop_globals_t;
 

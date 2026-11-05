@@ -503,29 +503,45 @@ static bool zval_from_stack(zval *output, bool add_local_vars, bool params_as_va
 static zval *last_exception_find_trace(zend_object *obj)
 {
 	int i;
+	zval key;
+
+	ZVAL_OBJ(&key, obj);
 
 	for (i = 0; i < XDEBUG_LAST_EXCEPTION_TRACE_SLOTS; i++) {
-		if (obj == XG_DEV(last_exception_trace).obj_ptr[i]) {
-			return &XG_DEV(last_exception_trace).stack_trace[i];
+		zval *map = &XG_DEV(last_exception_trace).weak_map[i];
+		zval *trace;
+
+		if (Z_ISUNDEF_P(map)) {
+			continue;
+		}
+		trace = Z_OBJ_HT_P(map)->read_dimension(Z_OBJ_P(map), &key, BP_VAR_IS, NULL);
+		if (trace) {
+			return trace;
 		}
 	}
 	return NULL;
 }
 
-static zval *last_exception_get_slot(zend_object *obj)
+static void last_exception_store_trace(zend_object *obj, zval *trace)
 {
-	int slot = XG_DEV(last_exception_trace).next_slot;
+	int slot;
+	zval map, old_map, key;
 
-	if (XG_DEV(last_exception_trace).obj_ptr[slot] != NULL) {
-		zval_ptr_dtor(&XG_DEV(last_exception_trace).stack_trace[slot]);
-		XG_DEV(last_exception_trace).obj_ptr[slot] = NULL;
-	}
+	/* Use the actual WeakMap handlers so Zend can also collect trace/key cycles. */
+	object_init_ex(&map, zend_hash_str_find_ptr(CG(class_table), "weakmap", sizeof("weakmap") - 1));
+	ZVAL_OBJ(&key, obj);
+	Z_OBJ_HT(map)->write_dimension(Z_OBJ(map), &key, trace);
 
-	XG_DEV(last_exception_trace).obj_ptr[slot] = obj;
-
+	slot = XG_DEV(last_exception_trace).next_slot;
 	XG_DEV(last_exception_trace).next_slot = (slot + 1 == XDEBUG_LAST_EXCEPTION_TRACE_SLOTS ? 0 : slot + 1);
 
-	return &XG_DEV(last_exception_trace).stack_trace[slot];
+	/* Publish the replacement before old values can run reentrant destructors. */
+	ZVAL_COPY_VALUE(&old_map, &XG_DEV(last_exception_trace).weak_map[slot]);
+	ZVAL_COPY_VALUE(&XG_DEV(last_exception_trace).weak_map[slot], &map);
+
+	if (!Z_ISUNDEF(old_map)) {
+		zval_ptr_dtor(&old_map);
+	}
 }
 
 /* Formatting variables */
@@ -1201,7 +1217,7 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 	zend_class_entry *exception_ce = exception->ce;
 	char *exception_trace;
 	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
-	zval *z_previous_exception, *z_last_exception_slot, *z_previous_trace;
+	zval *z_previous_exception, *z_previous_trace;
 	zend_object *previous_exception_obj = exception;
 	zval dummy;
 
@@ -1250,9 +1266,14 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 
 	/* Remember last stack trace so it can be retrieved in an exception handler through
 	 * xdebug_get_function_stack(['from_exception' => $e]) */
-	z_last_exception_slot = last_exception_get_slot(exception);
-	if (zval_from_stack(z_last_exception_slot, true, true)) {
-		zval_from_stack_add_frame(z_last_exception_slot, XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true, true);
+	if (!XG_DEV(last_exception_trace).shutting_down) {
+		zval trace;
+
+		if (zval_from_stack(&trace, true, true)) {
+			zval_from_stack_add_frame(&trace, XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true, true);
+		}
+		last_exception_store_trace(exception, &trace);
+		zval_ptr_dtor(&trace);
 	}
 
 	exception_trace = tmp_str.d;
