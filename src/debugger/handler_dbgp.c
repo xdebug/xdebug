@@ -66,6 +66,7 @@ xdebug_remote_handler xdebug_handler_dbgp = {
 	xdebug_dbgp_break_on_line,
 	xdebug_dbgp_breakpoint,
 	xdebug_dbgp_resolve_breakpoints,
+	xdebug_dbgp_reapply_source_maps,
 	xdebug_dbgp_stream_output,
 	xdebug_dbgp_notification,
 	xdebug_dbgp_user_notify,
@@ -3160,6 +3161,34 @@ int xdebug_dbgp_resolve_breakpoints(xdebug_con *context, zend_string *filename)
 	xdebug_hash_apply_with_argument(context->breakpoint_list, (void *) &resolv_ctxt, breakpoint_resolve_helper, NULL);
 
 	return 1;
+}
+
+static void breakpoint_reapply_helper(void *rctxt, xdebug_hash_element *he)
+{
+	xdebug_brk_admin            *admin = (xdebug_brk_admin*) he->ptr;
+	xdebug_brk_info             *brk_info;
+
+	brk_info = breakpoint_brk_info_fetch(admin->type, admin->key);
+
+	xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "Breakpoint %d (type: %s).", admin->id, XDEBUG_BREAKPOINT_TYPE_NAME(brk_info->brk_type));
+
+	switch (brk_info->brk_type) {
+		case XDEBUG_BREAKPOINT_TYPE_LINE:
+		case XDEBUG_BREAKPOINT_TYPE_CONDITIONAL:
+			map_local_to_remote_replace(brk_info);
+			return;
+
+		default:
+			xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "RA: The breakpoint type '%s' can not be resolved.", XDEBUG_BREAKPOINT_TYPE_NAME(brk_info->brk_type));
+			return;
+	}
+}
+
+void xdebug_dbgp_reapply_source_maps(xdebug_con *context)
+{
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "REAPPLY", "Reapplying all mapping rules for existing breakpoints");
+
+	xdebug_hash_apply(context->breakpoint_list, NULL, breakpoint_reapply_helper);
 }
 
 int xdebug_dbgp_stream_output(const char *string, unsigned int length)

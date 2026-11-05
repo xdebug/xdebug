@@ -52,32 +52,32 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-static bool scan_directory_exists(const char *dir)
+static bool scan_directory_exists(const char *dir, const char *prefix)
 {
-#ifndef WIN32
-	struct stat dir_info;
-#endif
-	char *map_dir = xdebug_sprintf("%s%c.xdebug", dir, DEFAULT_SLASH);
+	bool retval = true;
 
 #ifndef WIN32
+	struct stat dir_info;
+	char *map_dir = xdebug_sprintf("%s%s", dir, prefix);
+
 	/* See if .xdebug directory exists */
 	if (stat(map_dir, &dir_info) == -1) {
 		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "NODIR", "The map directory '%s' does not exist", map_dir);
-		return false;
+		retval = false;
+	} else if (!S_ISDIR(dir_info.st_mode)) {
+		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_WARN, "NOTADIR", "The map directory '%s' is not a directory", map_dir);
+		retval = false;
 	}
 
-	if (!S_ISDIR(dir_info.st_mode)) {
-		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_WARN, "NOTADIR", "The map directory '%s' is not a directory", map_dir);
-		return false;
-	}
+	xdfree(map_dir);
 #endif
 
-	return true;
+	return retval;
 }
 
-static void scan_directory(const char *dir)
+static bool scan_directory(const char *dir, const char *prefix)
 {
-	char *scan_dir = xdebug_sprintf("%s%c.xdebug%c*.map", dir, DEFAULT_SLASH, DEFAULT_SLASH);
+	char *scan_dir = xdebug_sprintf("%s%s%c*.map", dir, prefix, DEFAULT_SLASH);
 	xdebug_glob_t globbuf;
 	int glob_result = 0;
 	size_t i;
@@ -95,13 +95,13 @@ static void scan_directory(const char *dir)
 			xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "NOMATCH", "No map files found with pattern '%s'", scan_dir);
 			xdfree(scan_dir);
 
-			return;
+			return false;
 
 		default:
 			xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_WARN, "ERR-SCAN", "Scanning for map files with pattern '%s' failed", scan_dir);
 			xdfree(scan_dir);
 
-			return;
+			return false;
 	}
 
 	for (i = 0; i < globbuf.gl_pathc; i++) {
@@ -109,7 +109,7 @@ static void scan_directory(const char *dir)
 		int error_line;
 		char *error_message;
 
-		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "SCAN-READ", "Reading mapping file '%s'", globbuf.gl_pathv[i]);
+		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "SCAN-READ", "Reading mapping file '%s' with '%s' as current working directory", globbuf.gl_pathv[i], dir);
 
 		if (!xdebug_path_maps_parse_file(XG_LIB(path_mapping_information), dir, globbuf.gl_pathv[i], &error_code, &error_line, &error_message)) {
 			xdebug_log_ex(
@@ -122,6 +122,8 @@ static void scan_directory(const char *dir)
 
 	xdebug_globfree(&globbuf);
 	xdfree(scan_dir);
+
+	return true;
 }
 
 static void dump_rule_info(void *ret, xdebug_hash_element *e)
@@ -166,8 +168,8 @@ void xdebug_path_maps_scan(const char *script_source)
 		size_t length;
 		char *current_directory = virtual_getcwd_ex(&length);
 
-		if (scan_directory_exists(current_directory)) {
-			scan_directory(current_directory);
+		if (scan_directory_exists(current_directory, DEFAULT_SLASH_S ".xdebug")) {
+			scan_directory(current_directory, DEFAULT_SLASH_S ".xdebug");
 		}
 
 		efree(current_directory);
@@ -185,15 +187,15 @@ void xdebug_path_maps_scan(const char *script_source)
 	grand_dir = parts->c >= 4 ? xdebug_join(slash, parts, 0, parts->c - 4) : NULL;
 
 	if (grand_dir) {
-		scan_directory(grand_dir->d);
+		scan_directory(grand_dir->d, DEFAULT_SLASH_S ".xdebug");
 		xdebug_str_free(grand_dir);
 	}
 	if (parent_dir) {
-		scan_directory(parent_dir->d);
+		scan_directory(parent_dir->d, DEFAULT_SLASH_S ".xdebug");
 		xdebug_str_free(parent_dir);
 	}
 	if (current_dir) {
-		scan_directory(current_dir->d);
+		scan_directory(current_dir->d, DEFAULT_SLASH_S ".xdebug");
 		xdebug_str_free(current_dir);
 	}
 
@@ -202,6 +204,15 @@ void xdebug_path_maps_scan(const char *script_source)
 
 	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "RULES", "Found %zd path mapping rules", XG_LIB(path_mapping_information)->remote_to_local_map->size);
 	dump_mapping_rules(XG_LIB(path_mapping_information));
+}
+
+bool xdebug_path_maps_scan_directory(const char *directory, const char *prefix)
+{
+	if (scan_directory_exists(directory, prefix)) {
+		return scan_directory(directory, prefix);
+	}
+
+	return false;
 }
 
 int xdebug_path_maps_local_to_remote(const char *local_path, size_t local_line, xdebug_str **remote_path, size_t *remote_line)

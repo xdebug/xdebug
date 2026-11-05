@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,6 +92,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_string *filename, int lineno);
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, xdebug_str *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info, zval *return_value);
 int xdebug_dbgp_resolve_breakpoints(xdebug_con *context, zend_string *filename);
+void xdebug_dbgp_reapply_source_maps(xdebug_con *context);
 int xdebug_dbgp_stream_output(const char *string, unsigned int length);
 int xdebug_dbgp_notification(xdebug_con *context, xdebug_str *filename, long lineno, int type, char *type_string, char *message);
 int xdebug_dbgp_user_notify(xdebug_con *context, zend_string *filename, long lineno, zval *data);

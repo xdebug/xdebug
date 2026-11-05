@@ -2,16 +2,23 @@ trigger:
   batch: true
   branches:
     include:
-      - xdebug_3_4
+      - xdebug_3_5
       - master
 
 jobs:
   - template: .azure/macos/job.yml
     parameters:
-      configurationName: 'OSX_PHP_MASTER'
+      configurationName: 'OSX_PHP_86'
       phpVersion: 'branch'
-      phpBranch: 'master'
+      phpBranch: 'PHP-8.6'
       configurationParameters: '--enable-debug --disable-zts'
+      loadOpCache: 'no'
+  - template: .azure/macos/job.yml
+    parameters:
+      configurationName: 'OSX_PHP_86_ZTS'
+      phpVersion: 'branch'
+      phpBranch: 'PHP-8.6'
+      configurationParameters: '--enable-debug --enable-zts'
       loadOpCache: 'no'
   - template: .azure/macos/job.yml
     parameters:

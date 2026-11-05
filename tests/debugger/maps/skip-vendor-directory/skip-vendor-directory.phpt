@@ -64,7 +64,7 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%emaps%e.xdebug%e*.map'
 [%d] [Path Mapping] DEBUG: No map files found with pattern '%sdebugger%emaps%e.xdebug%e*.map'
 [%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%emaps%eskip-vendor-directory%e.xdebug%e*.map'
-[%d] [Path Mapping] INFO: Reading mapping file '%sdebugger%emaps%eskip-vendor-directory%e.xdebug%evendor.map'
+[%d] [Path Mapping] INFO: Reading mapping file '%sdebugger%emaps%eskip-vendor-directory%e.xdebug%evendor.map' with '%sskip-vendor-directory' as current working directory
 [%d] [Path Mapping] DEBUG: Found 1 path mapping rules
 %A
 [%d] [Step Debug] <- step_into -i 4
