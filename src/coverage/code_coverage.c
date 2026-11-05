@@ -50,6 +50,8 @@ xdebug_coverage_file *xdebug_coverage_file_ctor(zend_string *filename)
 
 	file->runtime.hit_lines = xdebug_mset_create(3);
 	file->runtime.functions = xdebug_hash_alloc(128, xdebug_coverage_runtime_function_dtor);
+	file->runtime.hit_counts_size = 0;
+	file->runtime.hit_counts = NULL;
 
 	file->has_branch_info = 0;
 
@@ -67,6 +69,10 @@ static void xdebug_coverage_file_dtor(void *data)
 
 	xdebug_mset_free(file->runtime.hit_lines);
 	xdebug_hash_destroy(file->runtime.functions);
+
+	if (file->runtime.hit_counts) {
+		xdfree(file->runtime.hit_counts);
+	}
 
 	xdfree(file);
 }
@@ -243,12 +249,41 @@ static xdebug_coverage_file *fetch_file(zend_string *filename)
 	return cov_file;
 }
 
+static void count_line_hit(xdebug_coverage_file *file, int lineno)
+{
+	function_stack_entry *fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+
+	if (fse) {
+		if (fse->code_coverage_last_lineno == lineno) {
+			return;
+		}
+		fse->code_coverage_last_lineno = lineno;
+	}
+
+	if ((unsigned int) lineno >= file->runtime.hit_counts_size) {
+		unsigned int new_size = lineno + 1;
+
+		file->runtime.hit_counts = xdrealloc(file->runtime.hit_counts, new_size * sizeof(zend_long));
+		memset(
+			file->runtime.hit_counts + file->runtime.hit_counts_size,
+			0,
+			(new_size - file->runtime.hit_counts_size) * sizeof(zend_long)
+		);
+		file->runtime.hit_counts_size = new_size;
+	}
+
+	file->runtime.hit_counts[lineno]++;
+}
 
 static void xdebug_count_line(zend_string *filename, int lineno)
 {
 	xdebug_coverage_file *file = fetch_file(filename);
 
 	xdebug_mset_add(file->runtime.hit_lines, lineno, COV_BIT_HIT);
+
+	if (XG_COV(code_coverage_hit_count)) {
+		count_line_hit(file, lineno);
+	}
 }
 
 static void xdebug_analysis_line(xdebug_coverage_file *file, int lineno, int active_code)
@@ -764,6 +799,10 @@ static void scrub_runtime(void *dummy, xdebug_hash_element *e)
 
 	xdebug_mset_clear(file->runtime.hit_lines);
 
+	if (file->runtime.hit_counts) {
+		memset(file->runtime.hit_counts, 0, file->runtime.hit_counts_size * sizeof(zend_long));
+	}
+
 	xdebug_hash_empty(file->runtime.functions);
 }
 
@@ -856,6 +895,17 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	XG_COV(code_coverage_unused) = (options & XDEBUG_CC_OPTION_UNUSED);
 	XG_COV(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
 	XG_COV(code_coverage_branch_check) = (options & XDEBUG_CC_OPTION_BRANCH_CHECK);
+	XG_COV(code_coverage_hit_count) = (options & XDEBUG_CC_OPTION_HIT_COUNT);
+
+	if (XG_COV(code_coverage_hit_count)) {
+		size_t i;
+
+		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++) {
+			function_stack_entry *fse = xdebug_vector_element_get(XG_BASE(stack), i);
+
+			fse->code_coverage_last_lineno = 0;
+		}
+	}
 
 	XG_COV(code_coverage_active) = 1;
 	RETURN_TRUE;
@@ -1095,7 +1145,11 @@ static void add_file(void *ret, xdebug_hash_element *e)
 			number += file->runtime.hit_lines->setinfo ? file->runtime.hit_lines->setinfo[i] : 0;
 		}
 		if (number) {
-			add_index_long(lines, i, nmap[number]);
+			if (XG_COV(code_coverage_hit_count) && nmap[number] == 1) {
+				add_index_long(lines, i, ((unsigned int) i < file->runtime.hit_counts_size) ? file->runtime.hit_counts[i] : 1);
+			} else {
+				add_index_long(lines, i, nmap[number]);
+			}
 		}
 	}
 
@@ -1158,6 +1212,7 @@ void xdebug_init_coverage_globals(xdebug_coverage_globals_t *xg)
 	xg->branches.size        = 0;
 	xg->branches.last_branch_nr = NULL;
 	xg->code_coverage_active = 0;
+	xg->code_coverage_hit_count = 0;
 
 	/* Get reserved offset */
 	xg->code_coverage_filter_offset = zend_xdebug_filter_offset;
@@ -1377,6 +1432,7 @@ void xdebug_coverage_register_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_UNUSED", XDEBUG_CC_OPTION_UNUSED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_BRANCH_CHECK", XDEBUG_CC_OPTION_BRANCH_CHECK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_CC_HIT_COUNT", XDEBUG_CC_OPTION_HIT_COUNT, CONST_CS | CONST_PERSISTENT);
 }
 
 void xdebug_coverage_rinit(void)
