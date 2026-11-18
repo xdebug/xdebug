@@ -39,6 +39,14 @@
 # endif
 #endif
 
+#if !defined DEFAULT_SLASH_S
+# ifdef WIN32
+#  define DEFAULT_SLASH_S "\\"
+# else
+#  define DEFAULT_SLASH_S "/"
+# endif
+#endif
+
 typedef struct xdebug_path_map_range xdebug_path_map_range;
 
 struct xdebug_path_map_range {

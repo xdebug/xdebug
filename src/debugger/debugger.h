@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -80,6 +80,7 @@ bool xdebug_debugger_check_evaled_code_zstr(zend_string *filename_in, zend_strin
 bool xdebug_debugger_check_evaled_code_xdebug_str(xdebug_str *filename_in, zend_string **filename_out);
 void xdebug_debugger_set_has_line_breakpoints(function_stack_entry *fse);
 int xdebug_debugger_map_remote_to_local(zend_string *remote_filename, int remote_lineno, xdebug_str **local_path, size_t *local_line, bool *must_free);
+void xdebug_debugger_reapply_source_maps(void);
 
 void xdebug_debugger_statement_call(zend_string *filename, int lineno);
 void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *code, char *code_str, zval *message);
