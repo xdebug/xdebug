@@ -259,6 +259,30 @@ static void xdebug_analysis_line(xdebug_coverage_file *file, int lineno, int act
 	}
 }
 
+/* Whether an opcode makes the line that it is on executable. The analysis
+ * (XDEBUG_CC_UNUSED) and the opcode handlers that count executed lines both
+ * use this, so that a line that is reported as executable is also reported as
+ * executed when one of its opcodes runs. */
+static int xdebug_opcode_makes_line_executable(int opcode)
+{
+	switch (opcode) {
+		case ZEND_NOP:
+		case ZEND_EXT_NOP:
+		case ZEND_RECV:
+		case ZEND_RECV_INIT:
+		case ZEND_OP_DATA:
+		case ZEND_TICKS:
+		case ZEND_FAST_CALL:
+		case ZEND_RECV_VARIADIC:
+#if PHP_VERSION_ID >= 80400
+		case ZEND_FREE:
+#endif
+			return 0;
+	}
+
+	return 1;
+}
+
 static int xdebug_common_override_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array;
@@ -295,19 +319,7 @@ static int xdebug_coverage_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 
 static void opcode_type_filter(xdebug_coverage_file *file, zend_op opcode, int active_code)
 {
-	if (
-		opcode.opcode != ZEND_NOP &&
-		opcode.opcode != ZEND_EXT_NOP &&
-		opcode.opcode != ZEND_RECV &&
-		opcode.opcode != ZEND_RECV_INIT
-		&& opcode.opcode != ZEND_OP_DATA
-		&& opcode.opcode != ZEND_TICKS
-		&& opcode.opcode != ZEND_FAST_CALL
-		&& opcode.opcode != ZEND_RECV_VARIADIC
-#if PHP_VERSION_ID >= 80400
-		&& opcode.opcode != ZEND_FREE
-#endif
-	) {
+	if (xdebug_opcode_makes_line_executable(opcode.opcode)) {
 		xdebug_analysis_line(file, opcode.lineno, active_code);
 	}
 }
@@ -1359,13 +1371,19 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 #endif
 
 	/* Override all the other opcodes so that we can mark when we hit a branch
-	 * start one */
+	 * start one. The opcodes that make a line executable also count their
+	 * line, as otherwise a line with only such opcodes on it would be
+	 * reported as executable, but never as executed. */
 	for (i = 0; i < 256; i++) {
 		if (i == ZEND_HANDLE_EXCEPTION) {
 			continue;
 		}
 		if (!xdebug_isset_opcode_handler(i)) {
-			xdebug_set_opcode_handler(i, xdebug_check_branch_entry_handler);
+			if (xdebug_opcode_makes_line_executable(i)) {
+				xdebug_set_opcode_handler(i, xdebug_common_override_handler);
+			} else {
+				xdebug_set_opcode_handler(i, xdebug_check_branch_entry_handler);
+			}
 		}
 	}
 
